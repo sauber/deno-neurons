@@ -3,6 +3,7 @@ import { Network } from "./network.ts";
 import { ScatterPlot } from "./scatter.ts";
 import type { Inputs, Outputs } from "./train.ts";
 import { Train } from "./train.ts";
+import { PixMap, Color } from "image";
 
 const network = new Network(2).dense(3).lrelu.dense(1).sigmoid;
 
@@ -29,7 +30,25 @@ Deno.test("Initialize", () => {
 Deno.test("Pixels", () => {
   const s = new ScatterPlot(network, xs, ys);
   const size = 4;
-  const p: Uint8Array = s.pixels(size * 2, size * 2);
+  const cols = size * 2;
+  const rows = size * 2;
+  const p: Uint8Array = s.pixels(cols, rows);
+
+  const image = new PixMap(cols, rows);
+  for (let col = 0; col < cols; ++col) {
+    for (let row = 0; row < rows; ++row) {
+      const index = (row * cols + col) * 4;
+      const [r, g, b] = [
+        p[index],
+        p[index+1],
+        p[index+2],
+      ];
+      image.set(col, row, new Color(r, g, b));
+    }
+  }
+
+  // Display blocks
+  console.log(image.toString());
 
   assertInstanceOf(p, Uint8Array);
   assertEquals(p.length, size ** 2 * 4 * 4);
