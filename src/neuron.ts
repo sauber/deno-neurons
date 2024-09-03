@@ -84,8 +84,9 @@ export class Scaler extends Node {
 
     // Scale input value to a:b
     // Scaling formula: (b-a) * (v-min) / (max-min) + a
-    return new Value(this.b-this.a).mul(v.sub(this.min)).div(this.max-this.min).add(this.a);
-
+    return new Value(this.b - this.a).mul(v.sub(this.min)).div(
+      this.max - this.min,
+    ).add(this.a);
   }
 
   /** Parameters

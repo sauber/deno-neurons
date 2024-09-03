@@ -1,3 +1,5 @@
 # deno-neurons
 
-Pure-deno implementation of neural network inspired by Micrograd.
+Pure-deno implementation of neural network.
+
+Based on MicrogradTS: https://github.com/trekhleb/micrograd-ts
