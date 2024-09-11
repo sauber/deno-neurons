@@ -34,7 +34,9 @@ function scale(
   );
 }
 
-type DataSet = number[][];
+type Row = number[];
+type Column = number[];
+type DataSet = Array<Row>;
 type Color = [number, number, number, number]; // R, G, B, A
 
 /** A canvas in range xmin:xmax, ymin:ymax */
@@ -173,37 +175,130 @@ export class ScatterPlot {
  * and generate ANSI digram printable on console.
  */
 export class Scatter {
+  /** Row of mean values from all columns */
+  private readonly means: Row;
+
+  /** Smallest input value in column for x-axis */
+  private readonly xmin: number;
+
+  /** Largest input value in column for x-axis */
+  private readonly xmax: number;
+
+  /** Smallest input value in column for y-axis */
+  private readonly ymin: number;
+
+  /** Largest input value in column for y-axis */
+  private readonly ymax: number;
+
   /**
-   * @param   {Network}  network  Neural network
-   * @param   {DataSet}  xs       Training input values
-   * @param   {DataSet}  ys       Training output values
+   * @param   {Network}   network       Neural network
+   * @param   {DataSet}   input         Training input values, array of rows of numbers
+   * @param   {DataSet}   output        Training output values, array of rows of numbers
+   * @param   {number}    xcol          Column number in input to use at x-axis
+   * @param   {number}    ycol          Column number in input to use at y-axis
+   * @param   {number}    zcol          Column number in output to use as value
+   * @param   {string[]}  inputLabels   Column names in input
+   * @param   {string[]}  outputLabels  Column names in input
    */
   constructor(
     private readonly network: Network,
-    private readonly xs: DataSet,
-    private readonly ys: DataSet
-  ) {}
+    private readonly input: DataSet,
+    private readonly output: DataSet,
+    private readonly xcol: number,
+    private readonly ycol: number,
+    private readonly zcol: number,
+    private readonly inputLabels: string[],
+    private readonly outputLabels: string[]
+  ) {
+    const first: Row = input[0];
+    this.means = Array(first.length);
+    const meanIndex = Math.round(first.length);
+    const lastIndex = input.length - 1;
+    let xmin: number = 0,
+      xmax: number = 1,
+      ymin: number = 0,
+      ymax: number = 1;
+    first.forEach((_, colIndex) => {
+      const column: Column = input.map((row) => row[colIndex]).sort();
+      switch (colIndex) {
+        case xcol:
+          // Min and Max values for x-axis
+          xmin = column[0];
+          xmax = column[lastIndex];
+          break;
+        case ycol:
+          // Min and Max values for y-axis
+          ymin = column[0];
+          ymax = column[lastIndex];
+          break;
+        default:
+          // Populate input row of mean values
+          this.means[colIndex] = column[meanIndex];
+      }
+    });
+    this.xmin = xmin;
+    this.xmax = xmax;
+    this.ymin = xmin;
+    this.ymax = xmax;
+  }
+
+  /** Return middle value of sorted values */
+  private static mean(col: Column): number {
+    const sorted = col.slice().sort();
+    const middle: number = Math.round(sorted.length / 2);
+    return sorted[middle];
+  }
+
+  /** Extract all values from one column */
+  private static column(grid: DataSet, n: number): Column {
+    return grid.map((row: Row) => row[n]);
+  }
+
+  /** Get grid of values from Network */
+  private values(xcount: number, ycount: number): DataSet {
+    const result: number[][] = [];
+    for (
+      let y = this.ymin;
+      y <= this.ymax;
+      y += (this.ymax - this.ymin) / (ycount - 1)
+    ) {
+      const row: Row = [];
+      for (
+        let x = this.xmin;
+        x <= this.xmax;
+        x += (this.xmax - this.xmin) / (xcount - 1)
+      ) {
+        const input = this.means;
+        input[this.xcol] = x;
+        input[this.ycol] = y;
+        const output: Row = this.network.predict(input);
+        const value: number = output[this.zcol];
+        row.push(value);
+      }
+      result.push(row);
+    }
+    return result;
+  }
 
   /** Generate the unannotated heatmap */
   private heatmap(width: number, height: number): string {
     return "";
   }
 
- /** Diagram Layout:
-  *  ▯ Lowest output  ▮ Highest output
-  *  Highest_Y┌────────────────────────┐
-  *           │                        │
-  * Y_Axisname│        heatmap         │
-  *           │                        │
-  *   Lowest_Y└────────────────────────┘
-  *       Lowest_X  Y_Axisname  Lowest_Y
-  */
+  /** Diagram Layout:
+   *  ▯ Lowest output  ▮ Highest output
+   *  Highest_Y┌────────────────────────┐
+   *           │                        │
+   * Y_Axisname│        heatmap         │
+   *           │                        │
+   *   Lowest_Y└────────────────────────┘
+   *       Lowest_X  Y_Axisname  Lowest_Y
+   */
   private layout(): number {
     // Reserved space for labels on Y axis
     // TODO: Calculate max of [Lowest_Y, Highest_Y and Y_Axisname]
     return 2;
   }
-
 
   /** Generate heatmap diagram
    * @param [width=40] Number of chars wide
@@ -212,6 +307,8 @@ export class Scatter {
    */
   public plot(width = 40, height = 10): string {
     const area = width * height;
+    const v = this.values(8, 4);
+    console.log(v);
     return "" + area;
   }
 }

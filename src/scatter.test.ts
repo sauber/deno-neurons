@@ -1,9 +1,8 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import { assertInstanceOf } from "@std/assert";
 import { Network } from "./network.ts";
-import { Scatter, ScatterPlot } from "./scatter.ts";
+import { Scatter } from "./scatter.ts";
 import type { Inputs, Outputs } from "./train.ts";
 import { Train } from "./train.ts";
-import { PixMap, Color } from "image";
 
 const network = new Network(2).dense(3).lrelu.dense(1).sigmoid;
 
@@ -16,14 +15,17 @@ const xs: Inputs = [
 ];
 const ys: Outputs = [[0], [1], [1], [0]];
 
-Deno.test("Inialize", () => {
-  const s = new Scatter(network, xs, ys);
-  assertInstanceOf(s, Scatter);
+// Initialize object
+const scatter = new Scatter(network, xs, ys, 0, 1, 0, ["x", "y"], ["XOR"]);
+
+
+Deno.test("Initialize", () => {
+  assertInstanceOf(scatter, Scatter);
 });
 
-Deno.test("Plot Untrained Network", () => {
-  const s = new Scatter(network, xs, ys);
-  assertInstanceOf(s, Scatter);
+Deno.test("Create a Diagram", () => {
+  const printable = scatter.plot(10,5);
+  console.log(printable);
 });
 
 
