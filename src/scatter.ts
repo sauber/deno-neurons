@@ -25,10 +25,13 @@ function scale(
   input_max: number,
   output_min: number,
   output_max: number,
-  input: number,
+  input: number
 ): number {
-  return (input - input_min) / (input_max - input_min) *
-      (output_max - output_min) + output_min;
+  return (
+    ((input - input_min) / (input_max - input_min)) *
+      (output_max - output_min) +
+    output_min
+  );
 }
 
 type DataSet = number[][];
@@ -44,7 +47,7 @@ class PixelCanvas {
     private readonly ymin: number,
     private readonly ymax: number,
     private readonly xsize: number,
-    private readonly ysize: number,
+    private readonly ysize: number
   ) {
     this.buffer = new Uint8Array(Array(xsize * ysize * 4).fill(0));
   }
@@ -53,10 +56,10 @@ class PixelCanvas {
   // TODO: Odd lines are ignored in terminal output
   private pos(x: number, y: number): number {
     const xg: number = Math.round(
-      scale(this.xmin, this.xmax, 0, this.xsize - 1, x),
+      scale(this.xmin, this.xmax, 0, this.xsize - 1, x)
     );
     const yg: number = Math.round(
-      scale(this.ymin, this.ymax, 0, this.ysize - 1, y),
+      scale(this.ymin, this.ymax, 0, this.ysize - 1, y)
     );
     // const yg: number = 2*Math.floor(
     //   scale(this.ymin, this.ymax, 0, this.ysize - 1, y)/2,
@@ -81,9 +84,8 @@ export class ScatterPlot {
   constructor(
     private readonly network: Network,
     private readonly xs: DataSet,
-    private readonly ys: DataSet,
-  ) {
-  }
+    private readonly ys: DataSet
+  ) {}
 
   /**
    * Create a pixbuffer of the plot
@@ -95,7 +97,13 @@ export class ScatterPlot {
    * @param   {number}      vcol   Output column number for values, default=0
    * @return  {Uint8Array}         8-bit RGBT buffer
    */
-  public pixels(xsize = 16, ysize = xsize, xcol = 0, ycol = 1, vcol = 0): Uint8Array {
+  public pixels(
+    xsize = 16,
+    ysize = xsize,
+    xcol = 0,
+    ycol = 1,
+    vcol = 0
+  ): Uint8Array {
     // Identify data columns
     const xs: number[] = column(this.xs, xcol);
     const ys: number[] = column(this.xs, ycol);
@@ -147,12 +155,63 @@ export class ScatterPlot {
       const [x, y] = [input[xcol], input[ycol]];
       const v: number = this.ys[index][vcol];
       const lightness = Math.floor(scale(pmin, pmax, 0, 255, v));
-      const color: Color = (lightness >= 128)
-        ? [0, lightness, 0, 255] // green
-        : [lightness + 64, 0, 0, 255]; // red
+      const color: Color =
+        lightness >= 128
+          ? [0, lightness, 0, 255] // green
+          : [lightness + 64, 0, 0, 255]; // red
       canvas.set(x, y, color);
     });
 
     return canvas.buffer;
+  }
+}
+
+/** Traverse range of values for two parameters of the input set,
+ * use mean input values for all other parameters,
+ * generate heatmap for the values in range,
+ * overlay values from output set,
+ * and generate ANSI digram printable on console.
+ */
+export class Scatter {
+  /**
+   * @param   {Network}  network  Neural network
+   * @param   {DataSet}  xs       Training input values
+   * @param   {DataSet}  ys       Training output values
+   */
+  constructor(
+    private readonly network: Network,
+    private readonly xs: DataSet,
+    private readonly ys: DataSet
+  ) {}
+
+  /** Generate the unannotated heatmap */
+  private heatmap(width: number, height: number): string {
+    return "";
+  }
+
+ /** Diagram Layout:
+  *  ▯ Lowest output  ▮ Highest output
+  *  Highest_Y┌────────────────────────┐
+  *           │                        │
+  * Y_Axisname│        heatmap         │
+  *           │                        │
+  *   Lowest_Y└────────────────────────┘
+  *       Lowest_X  Y_Axisname  Lowest_Y
+  */
+  private layout(): number {
+    // Reserved space for labels on Y axis
+    // TODO: Calculate max of [Lowest_Y, Highest_Y and Y_Axisname]
+    return 2;
+  }
+
+
+  /** Generate heatmap diagram
+   * @param [width=40] Number of chars wide
+   * @param [height=10] Number of chars high
+   * @result String printable on terminal console
+   */
+  public plot(width = 40, height = 10): string {
+    const area = width * height;
+    return "" + area;
   }
 }
