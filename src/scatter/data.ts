@@ -13,7 +13,7 @@ export class Column {
 
   /** Sort numbers */
   constructor(public readonly data: number[]) {
-    this.sorted = data.slice().sort();
+    this.sorted = data.slice().sort((a, b) => a - b);
   }
 
   /** Largest number */
@@ -28,7 +28,7 @@ export class Column {
 
   /** Middle number */
   public get mean(): number {
-    const index = Math.round((this.sorted.length-1) / 2);
+    const index = Math.round((this.sorted.length - 1) / 2);
     return this.sorted[index];
   }
 
