@@ -1,4 +1,4 @@
-import { assertInstanceOf } from "@std/assert";
+import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Network } from "./network.ts";
 import { Scatter } from "./scatter.ts";
 import type { Inputs, Outputs } from "./train.ts";
@@ -16,23 +16,41 @@ const xs: Inputs = [
 const ys: Outputs = [[0], [1], [1], [0]];
 
 // Initialize object
-const scatter = new Scatter(network, xs, ys, 0, 1, 0, ["x", "y"], ["XOR"]);
-
 
 Deno.test("Initialize", () => {
-  assertInstanceOf(scatter, Scatter);
+  const s = new Scatter(network, xs, ys);
+  console.log(s);
+  assertInstanceOf(s, Scatter);
 });
 
-Deno.test("Create a Diagram", () => {
-  const printable = scatter.plot(10,5);
+Deno.test("Plot", () => {
+  const s = new Scatter(network, xs, ys);
+  const printable = s.plot();
   console.log(printable);
 });
 
 
+// Deno.test("Autodetect ranges", () => {
+//   const s = new Scatter(network, xs, ys);
+//   assertEquals(s.xmin, 0);
+//   assertEquals(s.xmax, 1);
+//   assertEquals(s.ymin, 0);
+//   assertEquals(s.ymax, 1);
+// });
+
+// Deno.test("Manually set ranges", () => {
+//   const s = new Scatter(network, xs, ys, {xmin: -1, xmax: 2, ymin: -2, ymax: 3});
+//   assertEquals(s.xmin, -1);
+//   assertEquals(s.xmax, 2);
+//   assertEquals(s.ymin, -2);
+//   assertEquals(s.ymax, 3);
+// });
+
+
 // Train network
 const train = new Train(network, xs, ys);
-train.epsilon = 0.001;
-train.run(20000, 0.9);
+// train.epsilon = 0.001;
+// train.run(20000, 0.9);
 // console.log(network.export);
 
 // Deno.test("Initialize", () => {
