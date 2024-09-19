@@ -18,7 +18,7 @@ export class Train {
   public batchSize = 32;
 
   /** Callback funtion */
-  public callback: (iteration: number) => void = () => {};
+  public callback: (iteration: number, loss: number[]) => void = () => {};
 
   /** Number of iterations between callbacks */
   public callbackFrequency: number = 100;
@@ -95,7 +95,8 @@ export class Train {
     let i = 0;
     for (; i < iterations; i++) {
       this.step(rate);
-      if (i % this.callbackFrequency == 0) this.callback(i);
+      if (i % this.callbackFrequency == 0 && i > 0)
+        this.callback(i, this.lossHistory);
       const l = this.lossHistory.length;
       // Stop when loss is small enough
       if (this.lossHistory[this.lossHistory.length - 1] < this.epsilon) break;
@@ -103,6 +104,6 @@ export class Train {
       if (l >= 2 && this.lossHistory[l - 1] == this.lossHistory[l - 2]) break;
       // eta.sync_update(i);
     }
-    if (i % this.callbackFrequency != 0) this.callback(i);
+    if (i % this.callbackFrequency != 0) this.callback(i, this.lossHistory);
   }
 }

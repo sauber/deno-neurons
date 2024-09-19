@@ -3,7 +3,7 @@ import { Network } from "./network.ts";
 import { Scatter } from "./scatter.ts";
 import type { Inputs, Outputs } from "./train.ts";
 import { Train } from "./train.ts";
-import { Console } from "node:console";
+import { plot } from "chart";
 
 const xor = new Network(2).dense(3).lrelu.dense(1).sigmoid;
 
@@ -16,7 +16,18 @@ const xs: Inputs = [
 ];
 const ys: Outputs = [[0], [1], [1], [0]];
 
-// Initialize object
+// Resample data to 80 columns and display ascii chart
+function plot_graph(data: number[], height: number): string {
+  const step = (data.length - 1) / 26;
+  const samples: number[] = [];
+  for (let i = 0; i < data.length; i += step) {
+    samples.push(data[Math.floor(i)]);
+  }
+  // console.log({ samples });
+  return plot(samples, { height: height -1 });
+}
+
+
 
 Deno.test("Initialize", () => {
   const s = new Scatter(xor, xs, ys);
@@ -39,13 +50,7 @@ Deno.test("Untrained and trained plot", () => {
 
 Deno.test("Circle Training", () => {
   // Create network
-  // const circle = new Network(2).dense(9).lrelu.dense(11).lrelu.dense(7).lrelu.dense(5).sigmoid;
-  const circle = new Network(2)
-    .dense(8)
-    .lrelu.dense(6)
-    .lrelu.dense(4)
-    .lrelu.dense(1).tanh;
-  // const circle = new Network(2).dense(7).lrelu.dense(5).lrelu;
+  const circle = new Network(2).dense(16).lrelu.dense(8).lrelu.dense(1).tanh;
 
   // Generate test data for a fat circle
   const xs: Inputs = [];
@@ -70,10 +75,19 @@ Deno.test("Circle Training", () => {
   const train = new Train(circle, xs, ys);
   train.epsilon = 0.001;
   train.callbackFrequency = 100;
-  train.callback = (iterations: number) => {
+  train.callback = (iterations: number, losses: number[]) => {
     // console.log("\u001bc"); // Clear screen
     console.log("\u001B[H"); // Home
-    console.log(s.plot());
+    // console.log(s.plot());
+    // console.log(plot_graph(losses, 11));
+
+    const scatter: string[] = s.plot().split("\n");
+    const loss: string[] = plot_graph(losses, 11).split("\n");
+
+    scatter.forEach((line, index)=>{
+      console.log(line + loss[index]);
+    })
+    
     console.log(`Iterations: ${iterations}\n`);
   };
   console.log("\u001bc"); // Clear screen
