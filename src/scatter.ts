@@ -4,39 +4,45 @@ import type { Inputs, Outputs, Column } from "./scatter/data.ts";
 import { Prediction } from "./scatter/prediction.ts";
 import { blockify } from "@image";
 
-/** Generate a string of consecutive chars */
-function pad(width: number, char: string = " "): string {
-  return new Array(width).fill(char).join("");
-}
-
-/** Overwrite left side of string */
-function left(original: string, overwrite: string): string {
-  return overwrite + original.substring(overwrite.length, original.length);
-}
-
-/** Overwrite right side of string */
-function right(original: string, overwrite: string): string {
-  return original.substring(0, original.length - overwrite.length) + overwrite;
-}
-
-/** Overwrite middle of string */
-function center(original: string, overwrite: string): string {
-  return at(original, overwrite, original.length/2);
-}
-
-/** Overwrite string centered at position */
-function at(original: string, overwrite: string, position: number): string {
-  return (
-    original.substring(0, position - Math.floor(overwrite.length / 2)) +
-    overwrite +
-    original.substring(
-      position + Math.ceil(overwrite.length / 2),
-      original.length
-    )
-  );
-}
 
 type Overlay = [Column, Column, Column];
+
+/** A blank line with labels added at positions */
+class BarLine {
+  public line: string;
+
+  constructor(width: number) {
+    this.line = new Array(width).fill(" ").join("");
+  }
+
+  /** Label at left side of bar */
+  public left(label: string): this {
+    this.line = label + this.line.substring(label.length, this.line.length);
+    return this;
+  }
+
+  /** Label at right side of bar */
+  public right(label: string): this {
+    this.line = this.line.substring(0, this.line.length - label.length) + label;
+    return this;
+  }
+
+  /** Label centered at position */
+  public at(position: number, label: string): this {
+    this.line =
+      this.line.substring(0, position - Math.floor(label.length / 2)) +
+      label +
+      this.line.substring(
+        position + Math.ceil(label.length / 2),
+        this.line.length
+      );
+    return this;
+  }
+  /** Label at middle of string */
+  public center(label: string): this {
+    return this.at(this.line.length / 2, label);
+  }
+}
 
 class HeatmapMaker {
   /** Row of mean values from all columns */
@@ -160,7 +166,7 @@ class XAxis {
     private readonly name: string,
     private readonly width: number,
     private readonly high: number,
-    private readonly low: number,
+    private readonly low: number
   ) {}
 
   /** Number of lines high */
@@ -174,11 +180,17 @@ class XAxis {
   public render(): string[] {
     const low: string = this.low.toPrecision(2);
     const high: string = this.high.toPrecision(2);
-    let bar: string = pad(this.width);
-    bar = at(bar, low, this.start)
-    bar = right(bar, high);
-    bar = at(bar, this.name, this.start+(this.width-this.start)/2);
-    return [bar];
+    // let bar: string = pad(this.width);
+    // bar = at(bar, low, this.start);
+    // bar = right(bar, high);
+    // bar = at(bar, this.name, this.start + (this.width - this.start) / 2);
+
+    const bar = new BarLine(this.width)
+      .at(this.start, low)
+      .right(high)
+      .at(this.start + (this.width - this.start) / 2, this.name);
+
+    return [bar.line];
   }
 }
 
@@ -226,12 +238,16 @@ class YAxis {
   public render(): string[] {
     const w: number = this.width; // Width
     const h: number = this.height; // Height
-    const padding: string = pad(w);
+    // const padding: string = pad(w);
+    const padding = new BarLine(w).line;
     const lines: string[] = Array(h).fill(padding);
-    lines[0] = padding.slice(0, w - this.highLabel.length) + this.highLabel;
+    // lines[0] = padding.slice(0, w - this.highLabel.length) + this.highLabel;
+    lines[0] = new BarLine(w).right(this.highLabel).line;
     lines[Math.round((h - 1) / 2)] =
-      padding.slice(0, w - this.name.length) + this.name;
-    lines[h - 1] = padding.slice(0, w - this.lowLabel.length) + this.lowLabel;
+      // padding.slice(0, w - this.name.length) + this.name;
+      new BarLine(w).center(this.name).line
+    // lines[h - 1] = padding.slice(0, w - this.lowLabel.length) + this.lowLabel;
+    lines[h-1] = new BarLine(w).right(this.lowLabel).line
     return lines;
   }
 }
@@ -263,10 +279,8 @@ class ZAxis {
   public render(low: number, high: number): string[] {
     // TODO: Color encode to black background and white foreground
     const labels = "▯ " + low.toPrecision(2) + "  ▮ " + high.toPrecision(2);
-    let bar = pad(this.width);
-    bar = at(bar, labels, this.start + (this.width-this.start)/2);
-    // const padding: string = pad(this.width - labels.length);
-    return [bar];
+    const bar = new BarLine(this.width).at(this.start + (this.width - this.start) / 2, labels);
+    return [bar.line];
   }
 }
 
