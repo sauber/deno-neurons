@@ -1,12 +1,39 @@
 import type { Network } from "./network.ts";
 import { Training } from "./scatter/data.ts";
-import type { Inputs, Outputs, Column, Row } from "./scatter/data.ts";
+import type { Inputs, Outputs, Column } from "./scatter/data.ts";
 import { Prediction } from "./scatter/prediction.ts";
 import { blockify } from "@image";
 
 /** Generate a string of consecutive chars */
 function pad(width: number, char: string = " "): string {
   return new Array(width).fill(char).join("");
+}
+
+/** Overwrite left side of string */
+function left(original: string, overwrite: string): string {
+  return overwrite + original.substring(overwrite.length, original.length);
+}
+
+/** Overwrite right side of string */
+function right(original: string, overwrite: string): string {
+  return original.substring(0, original.length - overwrite.length) + overwrite;
+}
+
+/** Overwrite middle of string */
+function center(original: string, overwrite: string): string {
+  return at(original, overwrite, original.length/2);
+}
+
+/** Overwrite string centered at position */
+function at(original: string, overwrite: string, position: number): string {
+  return (
+    original.substring(0, position - Math.floor(overwrite.length / 2)) +
+    overwrite +
+    original.substring(
+      position + Math.ceil(overwrite.length / 2),
+      original.length
+    )
+  );
 }
 
 type Overlay = [Column, Column, Column];
@@ -77,7 +104,7 @@ class Heatmap {
       ints.map((i) => [i, i, i, 0]).flat()
     );
 
-    // Overlay training 
+    // Overlay training
     // console.log(this.overlay);
     const xmin = this.overlay[0].min;
     const xmax = this.overlay[0].max;
@@ -104,8 +131,8 @@ class Heatmap {
       // console.log({ x,xmin,xmax, y, ymin,ymax, xf, yf, xi, yi, index });
 
       // Insert red or green pixel
-      // if (index >= 0) 
-        bitmap.set([255 - v, v, 64], index);
+      // if (index >= 0)
+      bitmap.set([255 - v, v, Math.round(v / 2)], index);
     });
 
     const printable: string = blockify(bitmap, this.width * 2, this.height * 2);
@@ -120,6 +147,9 @@ class Heatmap {
 
 /** Render values and label on X Axis */
 class XAxis {
+  // Char position where axis begins
+  public start: number = 0;
+
   /**
    * @param {string} name Label for X Axis
    * @param {number} high Highest value on X axis
@@ -128,9 +158,9 @@ class XAxis {
    */
   constructor(
     private readonly name: string,
+    private readonly width: number,
     private readonly high: number,
     private readonly low: number,
-    private readonly width: number
   ) {}
 
   /** Number of lines high */
@@ -139,16 +169,16 @@ class XAxis {
   }
 
   /** Generate all lines in X Axis
-   * TODO: Align to edges of heatmap
    * TODO: This output is static, so only render once
    */
   public render(): string[] {
     const low: string = this.low.toPrecision(2);
     const high: string = this.high.toPrecision(2);
-    const labels: string = [low, this.name, high].join("  ");
-    const padwidth: number = this.width - labels.length;
-    const padding: string = pad(this.width - labels.length);
-    return [padding + labels];
+    let bar: string = pad(this.width);
+    bar = at(bar, low, this.start)
+    bar = right(bar, high);
+    bar = at(bar, this.name, this.start+(this.width-this.start)/2);
+    return [bar];
   }
 }
 
@@ -212,6 +242,9 @@ class YAxis {
 
 /** Render values and label on Z Axis */
 class ZAxis {
+  // Char position where content starts
+  public start: number = 0;
+
   /**
    * @param {string} name Label for Z Axis
    * @param {number} width Number of chars wide
@@ -230,8 +263,10 @@ class ZAxis {
   public render(low: number, high: number): string[] {
     // TODO: Color encode to black background and white foreground
     const labels = "▯ " + low.toPrecision(2) + "  ▮ " + high.toPrecision(2);
-    const padding: string = pad(this.width - labels.length);
-    return [padding + labels];
+    let bar = pad(this.width);
+    bar = at(bar, labels, this.start + (this.width-this.start)/2);
+    // const padding: string = pad(this.width - labels.length);
+    return [bar];
   }
 }
 
@@ -290,10 +325,12 @@ export class Scatter {
 
     const xs: Column = data.xs;
     const ys: Column = data.ys;
-    this.xaxis = new XAxis(this.xlabel, xs.max, xs.min, this.width);
+    this.xaxis = new XAxis(this.xlabel, this.width, xs.max, xs.min);
     this.zaxis = new ZAxis(this.zlabel, this.width);
     const height: number = this.height - this.zaxis.height - this.xaxis.height;
     this.yaxis = new YAxis(this.ylabel, ys.max, ys.min, height);
+    this.xaxis.start = this.yaxis.width;
+    this.zaxis.start = this.yaxis.width;
     this.maker = new HeatmapMaker(
       this.width - this.yaxis.width,
       height,

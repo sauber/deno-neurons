@@ -38,18 +38,23 @@ Deno.test("Untrained and trained plot", () => {
 
 Deno.test("Circle Training", () => {
   // Create network
-  const circle = new Network(2).dense(9).lrelu.dense(11).lrelu.dense(7).lrelu.dense(5).sigmoid;
+  // const circle = new Network(2).dense(9).lrelu.dense(11).lrelu.dense(7).lrelu.dense(5).sigmoid;
+  const circle = new Network(2).dense(8).lrelu.dense(6).lrelu.dense(4).lrelu.dense(1).tanh;
+  // const circle = new Network(2).dense(7).lrelu.dense(5).lrelu;
 
   // Generate test data for a fat circle
   const xs: Inputs = [];
   const ys: Outputs = [];
-  for (let i = 0; i<50; ++i) {
+  for (let i = 0; i<150; ++i) {
     const x = Math.random()*2-1;
     const y = Math.random()*2-1;
     const r = Math.sqrt(x*x+y*y);
-    const v = (r >=0.45 && r<= 0.75) ? 1 : 0;
+    // Circle
+    const c = (r >=0.45 && r<= 0.75) ? 1 : -1;
+    // Wave
+    const w = r < 0.5 ? (2*r)-0.5 : 1.5-(2*r);
     xs.push([x,y]);
-    ys.push([v]);
+    ys.push([c]);
   }
   // console.log({xs, ys})
 
