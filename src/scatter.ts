@@ -1,9 +1,9 @@
+import { bgRgb24, rgb24 } from "@std/fmt/colors";
 import type { Network } from "./network.ts";
 import { Training } from "./scatter/data.ts";
 import type { Inputs, Outputs, Column } from "./scatter/data.ts";
 import { Prediction } from "./scatter/prediction.ts";
 import { blockify } from "@image";
-
 
 type Overlay = [Column, Column, Column];
 
@@ -104,14 +104,12 @@ class Heatmap {
 
   /** Render heatmap as lines of strings */
   public render(): string[] {
-    // const values = this.prediction.outputs(this.zcol);
     const ints: number[] = this.values.map((v) => this.vscale(v));
     const bitmap: Uint8Array = new Uint8Array(
       ints.map((i) => [i, i, i, 0]).flat()
     );
 
     // Overlay training
-    // console.log(this.overlay);
     const xmin = this.overlay[0].min;
     const xmax = this.overlay[0].max;
     const ymin = this.overlay[1].min;
@@ -134,10 +132,8 @@ class Heatmap {
 
       // Calculate index in bitmap
       const index = (yi * width + xi) * 4;
-      // console.log({ x,xmin,xmax, y, ymin,ymax, xf, yf, xi, yi, index });
 
       // Insert red or green pixel
-      // if (index >= 0)
       bitmap.set([255 - v, v, Math.round(v / 2)], index);
     });
 
@@ -245,9 +241,9 @@ class YAxis {
     lines[0] = new BarLine(w).right(this.highLabel).line;
     lines[Math.round((h - 1) / 2)] =
       // padding.slice(0, w - this.name.length) + this.name;
-      new BarLine(w).center(this.name).line
+      new BarLine(w).center(this.name).line;
     // lines[h - 1] = padding.slice(0, w - this.lowLabel.length) + this.lowLabel;
-    lines[h-1] = new BarLine(w).right(this.lowLabel).line
+    lines[h - 1] = new BarLine(w).right(this.lowLabel).line;
     return lines;
   }
 }
@@ -277,10 +273,30 @@ class ZAxis {
    * @param {number} high Highest output value
    */
   public render(low: number, high: number): string[] {
-    // TODO: Color encode to black background and white foreground
-    const labels = "▯ " + low.toPrecision(2) + "  ▮ " + high.toPrecision(2);
-    const bar = new BarLine(this.width).at(this.start + (this.width - this.start) / 2, labels);
-    return [bar.line];
+    const block = "█";
+    const red: string = rgb24(block, { r: 255, g: 0, b: 0 });
+    const green: string = rgb24(block, { r: 0, g: 255, b: 128 });
+    const black: string = rgb24(block, { r: 0, g: 0, b: 0 });
+    const white: string = rgb24(block, { r: 255, g: 255, b: 255 });
+    const labels: string =
+      black +
+      "/" +
+      red +
+      "=" +
+      low.toPrecision(2) +
+      "  " +
+      white +
+      "/" +
+      green +
+      "=" +
+      high.toPrecision(2);
+    const labelwidth: number =
+      low.toPrecision(2).length + high.toPrecision(2).length + 10;
+    const bar: string =
+      new BarLine(Math.ceil((this.width - labelwidth) / 2)).line +
+      labels +
+      new BarLine(Math.floor((this.width - labelwidth) / 2)).line;
+    return [bar];
   }
 }
 
