@@ -278,6 +278,7 @@ class ZAxis {
     const green: string = rgb24(block, { r: 0, g: 255, b: 128 });
     const black: string = rgb24(block, { r: 0, g: 0, b: 0 });
     const white: string = rgb24(block, { r: 255, g: 255, b: 255 });
+    // Generate this sting: "#/#=-1.0  #/#=1.0"
     const labels: string =
       black +
       "/" +
