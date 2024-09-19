@@ -3,6 +3,7 @@ import { Network } from "./network.ts";
 import { Scatter } from "./scatter.ts";
 import type { Inputs, Outputs } from "./train.ts";
 import { Train } from "./train.ts";
+import { Console } from "node:console";
 
 const xor = new Network(2).dense(3).lrelu.dense(1).sigmoid;
 
@@ -39,21 +40,25 @@ Deno.test("Untrained and trained plot", () => {
 Deno.test("Circle Training", () => {
   // Create network
   // const circle = new Network(2).dense(9).lrelu.dense(11).lrelu.dense(7).lrelu.dense(5).sigmoid;
-  const circle = new Network(2).dense(8).lrelu.dense(6).lrelu.dense(4).lrelu.dense(1).tanh;
+  const circle = new Network(2)
+    .dense(8)
+    .lrelu.dense(6)
+    .lrelu.dense(4)
+    .lrelu.dense(1).tanh;
   // const circle = new Network(2).dense(7).lrelu.dense(5).lrelu;
 
   // Generate test data for a fat circle
   const xs: Inputs = [];
   const ys: Outputs = [];
-  for (let i = 0; i<150; ++i) {
-    const x = Math.random()*2-1;
-    const y = Math.random()*2-1;
-    const r = Math.sqrt(x*x+y*y);
+  for (let i = 0; i < 150; ++i) {
+    const x = Math.random() * 2 - 1;
+    const y = Math.random() * 2 - 1;
+    const r = Math.sqrt(x * x + y * y);
     // Circle
-    const c = (r >=0.45 && r<= 0.75) ? 1 : -1;
+    const c = r >= 0.45 && r <= 0.75 ? 1 : -1;
     // Wave
-    const w = r < 0.5 ? (2*r)-0.5 : 1.5-(2*r);
-    xs.push([x,y]);
+    const w = r < 0.5 ? 2 * r - 0.5 : 1.5 - 2 * r;
+    xs.push([x, y]);
     ys.push([c]);
   }
   // console.log({xs, ys})
@@ -64,9 +69,18 @@ Deno.test("Circle Training", () => {
 
   const train = new Train(circle, xs, ys);
   train.epsilon = 0.001;
+  train.callbackFrequency = 100;
+  train.callback = (iterations: number) => {
+    // console.log("\u001bc"); // Clear screen
+    console.log("\u001B[H"); // Home
+    console.log(s.plot());
+    console.log(`Iterations: ${iterations}\n`);
+  };
+  console.log("\u001bc"); // Clear screen
+  console.log("\u001B[?25l"); // Hide cursor
   train.run(20000, 0.4);
-  
-  const trained = s.plot();
-  console.log(trained);
+  console.log("\u001B[?25h"); // Show cursor
 
-})
+  // const trained = s.plot();
+  // console.log(trained);
+});

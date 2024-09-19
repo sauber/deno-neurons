@@ -14,13 +14,19 @@ export class Train {
   // Stop when loss is lower than epsilon
   public epsilon = 0.0001;
 
-  // Noumber of samples per step
-  public batchSize = 23;
+  // Number of samples per step
+  public batchSize = 32;
+
+  /** Callback funtion */
+  public callback: (iteration: number) => void = () => {};
+
+  /** Number of iterations between callbacks */
+  public callbackFrequency: number = 100;
 
   constructor(
     private readonly network: Network,
     input: Inputs,
-    output: Outputs,
+    output: Outputs
   ) {
     this.xs = input.map((row) => row.map((v) => new Value(v)));
     this.ys = output.map((row) => row.map((v) => new Value(v)));
@@ -79,16 +85,17 @@ export class Train {
         // loss.print();
         p.print();
         console.log({ learning_rate, grad: p.grad });
-        throw new Error("Data is Infinity");
+        throw new Error("Data approaching Infinity");
       }
     }
   }
 
+  /** Iterate until loss is less than epsilon or until max iterations reached */
   public run(iterations: number = 1000, rate: number = 0.1): void {
-    // const eta = new ProgressBar('Training', iterations);
     let i = 0;
     for (; i < iterations; i++) {
       this.step(rate);
+      if (i % this.callbackFrequency == 0) this.callback(i);
       const l = this.lossHistory.length;
       // Stop when loss is small enough
       if (this.lossHistory[this.lossHistory.length - 1] < this.epsilon) break;
@@ -96,7 +103,6 @@ export class Train {
       if (l >= 2 && this.lossHistory[l - 1] == this.lossHistory[l - 2]) break;
       // eta.sync_update(i);
     }
-    // eta.finish();
-    console.log("Iterations: ", i);
+    if (i % this.callbackFrequency != 0) this.callback(i);
   }
 }
