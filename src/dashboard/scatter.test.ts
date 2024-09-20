@@ -24,14 +24,14 @@ Deno.test("Initialize", () => {
 Deno.test("Untrained and trained plot", () => {
   const s = new Scatter(xor, xs, ys);
   const initial = s.plot();
-  console.log(initial);
+  // console.log(initial);
 
   const train = new Train(xor, xs, ys);
   train.epsilon = 0.001;
   train.run(20000, 0.9);
 
   const trained = s.plot();
-  console.log(trained);
+  // console.log(trained);
 });
 
 Deno.test("Circle Training", () => {
@@ -60,5 +60,5 @@ Deno.test("Circle Training", () => {
 
   const s = new Scatter(circle, xs, ys);
   const trained = s.plot();
-  console.log(trained);
+  // console.log(trained);
 });

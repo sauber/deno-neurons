@@ -92,8 +92,8 @@ export class Train {
 
   /** Iterate until loss is less than epsilon or until max iterations reached */
   public run(iterations: number = 1000, rate: number = 0.1): number {
-    let i = 0;
-    for (; i < iterations; i++) {
+    let i = 1;
+    for (; i <= iterations; i++) {
       this.step(rate);
       if (i % this.callbackFrequency == 0 && i > 0)
         this.callback(i, this.lossHistory);
@@ -104,8 +104,8 @@ export class Train {
       if (l >= 2 && this.lossHistory[l - 1] == this.lossHistory[l - 2]) break;
       // eta.sync_update(i);
     }
+    --i;
     if (i % this.callbackFrequency != 0) this.callback(i, this.lossHistory);
     return i;
   }
-  
 }

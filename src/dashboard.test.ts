@@ -1,4 +1,4 @@
-import { assertInstanceOf, assertMatch } from "@std/assert";
+import { assertInstanceOf, assertLessOrEqual, assertMatch } from "@std/assert";
 import { Dashboard } from "./dashboard.ts";
 import { Network } from "./network.ts";
 import { Train } from "./train.ts";
@@ -44,16 +44,19 @@ Deno.test("Iteration 1", () => {
 Deno.test("Iteration 2", () => {
   const d = new Dashboard(train);
   const v: string = d.render(2, [1, 2]);
-  console.log(v);
+  // console.log(v);
 });
 
 Deno.test("Iteration 100", () => {
   const d = new Dashboard(train);
   const v: string = d.render(100, Array(100).fill(0).map(_=>Math.random()));
-  console.log(v);
+  // console.log(v);
 });
 
 Deno.test("Run Iterations", {ignore: false}, () => {
   const d = new Dashboard(train, 60, 10);
-  d.run(20000, 0.1, 100);
+  const max = 2000;
+  const iterations = d.run(max, 0.4, 10);
+  assertLessOrEqual(iterations, max);
+  // console.log("Iterations: ", iterations);
 });
