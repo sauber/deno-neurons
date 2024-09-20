@@ -24,10 +24,8 @@ function plot_graph(data: number[], height: number): string {
     samples.push(data[Math.floor(i)]);
   }
   // console.log({ samples });
-  return plot(samples, { height: height -1 });
+  return plot(samples, { height: height - 1, padding: "     " });
 }
-
-
 
 Deno.test("Initialize", () => {
   const s = new Scatter(xor, xs, ys);
@@ -64,33 +62,39 @@ Deno.test("Circle Training", () => {
     // Wave
     const w = r < 0.5 ? 2 * r - 0.5 : 1.5 - 2 * r;
     xs.push([x, y]);
-    ys.push([c]);
+    ys.push([w]);
   }
   // console.log({xs, ys})
 
   const s = new Scatter(circle, xs, ys);
-  const initial = s.plot();
-  console.log(initial);
+  // const initial = s.plot();
+  // console.log(initial);
 
   const train = new Train(circle, xs, ys);
   train.epsilon = 0.001;
   train.callbackFrequency = 100;
+    let first = true;
   train.callback = (iterations: number, losses: number[]) => {
     // console.log("\u001bc"); // Clear screen
-    console.log("\u001B[H"); // Home
+    // console.log("\u001B[H"); // Home
     // console.log(s.plot());
     // console.log(plot_graph(losses, 11));
+
+    if (!first) {
+      // console.log("Going up");
+      console.log("\u001B[14F");
+    } else first = false;
 
     const scatter: string[] = s.plot().split("\n");
     const loss: string[] = plot_graph(losses, 11).split("\n");
 
-    scatter.forEach((line, index)=>{
+    scatter.forEach((line, index) => {
       console.log(line + loss[index]);
-    })
-    
+    });
+
     console.log(`Iterations: ${iterations}\n`);
   };
-  console.log("\u001bc"); // Clear screen
+  // console.log("\u001bc"); // Clear screen
   console.log("\u001B[?25l"); // Hide cursor
   train.run(20000, 0.4);
   console.log("\u001B[?25h"); // Show cursor
