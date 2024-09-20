@@ -24,12 +24,12 @@ export class Train {
   public callbackFrequency: number = 100;
 
   constructor(
-    private readonly network: Network,
-    input: Inputs,
-    output: Outputs
+    public readonly network: Network,
+    public readonly inputs: Inputs,
+    public readonly outputs: Outputs
   ) {
-    this.xs = input.map((row) => row.map((v) => new Value(v)));
-    this.ys = output.map((row) => row.map((v) => new Value(v)));
+    this.xs = inputs.map((row) => row.map((v) => new Value(v)));
+    this.ys = outputs.map((row) => row.map((v) => new Value(v)));
   }
 
   private static MeanSquareError(a: Values, b: Values): Value {
@@ -91,7 +91,7 @@ export class Train {
   }
 
   /** Iterate until loss is less than epsilon or until max iterations reached */
-  public run(iterations: number = 1000, rate: number = 0.1): void {
+  public run(iterations: number = 1000, rate: number = 0.1): number {
     let i = 0;
     for (; i < iterations; i++) {
       this.step(rate);
@@ -105,5 +105,7 @@ export class Train {
       // eta.sync_update(i);
     }
     if (i % this.callbackFrequency != 0) this.callback(i, this.lossHistory);
+    return i;
   }
+  
 }

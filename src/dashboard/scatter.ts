@@ -1,52 +1,15 @@
-import { bgRgb24, rgb24 } from "@std/fmt/colors";
-import type { Network } from "./network.ts";
-import { Training } from "./scatter/data.ts";
-import type { Inputs, Outputs, Column } from "./scatter/data.ts";
-import { Prediction } from "./scatter/prediction.ts";
+import { rgb24 } from "@std/fmt/colors";
 import { blockify } from "@image";
+import type { Network } from "../network.ts";
+import { Training } from "./data.ts";
+import type { Inputs, Outputs, Column, Row } from "./data.ts";
+import { BarLine } from "./barline.ts";
 
 type Overlay = [Column, Column, Column];
 
-/** A blank line with labels added at positions */
-class BarLine {
-  public line: string;
-
-  constructor(width: number) {
-    this.line = new Array(width).fill(" ").join("");
-  }
-
-  /** Label at left side of bar */
-  public left(label: string): this {
-    this.line = label + this.line.substring(label.length, this.line.length);
-    return this;
-  }
-
-  /** Label at right side of bar */
-  public right(label: string): this {
-    this.line = this.line.substring(0, this.line.length - label.length) + label;
-    return this;
-  }
-
-  /** Label centered at position */
-  public at(position: number, label: string): this {
-    this.line =
-      this.line.substring(0, position - Math.floor(label.length / 2)) +
-      label +
-      this.line.substring(
-        position + Math.ceil(label.length / 2),
-        this.line.length
-      );
-    return this;
-  }
-  /** Label at middle of string */
-  public center(label: string): this {
-    return this.at(this.line.length / 2, label);
-  }
-}
-
 class HeatmapMaker {
   /** Row of mean values from all columns */
-  private readonly prediction: Prediction;
+  private readonly inputs: Inputs;
   private readonly zcol: number;
   private readonly overlay: Overlay;
 
@@ -59,18 +22,18 @@ class HeatmapMaker {
   constructor(
     private readonly width: number,
     private readonly height: number,
-    private readonly network: Network,
+    readonly network: Network,
     private readonly train: Training
   ) {
-    const inputs = train.scatter(width * 2, height * 2);
-    this.prediction = new Prediction(network, inputs);
+    this.inputs = train.scatter(width * 2, height * 2);
     this.zcol = train.zcol;
-
     this.overlay = [train.xs, train.ys, train.values];
   }
 
   public heatmap(): Heatmap {
-    const values = this.prediction.outputs(this.zcol);
+    const values: number[] = this.inputs.map(
+      (input) => (this.network.predict(input) as Row)[this.zcol]
+    );
     const min: number = Math.min(...values, this.train.values.min);
     const max: number = Math.max(...values, this.train.values.max);
     return new Heatmap(values, this.overlay, min, max, this.width, this.height);
