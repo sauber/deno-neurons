@@ -31,7 +31,6 @@ Deno.test("Hidden and output layer", () => {
 Deno.test("Import/export", () => {
   const n: Network = new Network(2).dense(1).relu;
   const e: NetworkData = n.export;
-  // console.log(stringify(e));
   const i: Network = Network.import(e);
   const e2: NetworkData = i.export;
   assertEquals(e, e2);
@@ -40,7 +39,6 @@ Deno.test("Import/export", () => {
 Deno.test("XOR testing", () => {
   const n: Network = new Network(2).dense(1).relu;
   const e: NetworkData = n.export;
-  // console.log(stringify(e));
   const i: Network = Network.import(e);
   const e2: NetworkData = i.export;
   assertEquals(e, e2);

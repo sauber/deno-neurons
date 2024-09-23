@@ -67,7 +67,6 @@ export class Dashboard {
     this.train.callbackFrequency = frequency;
     const last: number = this.train.run(iterations, learning_rate);
     console.log(SHOW, lineup);
-    // console.log(SHOW);
     return last;
   }
 }

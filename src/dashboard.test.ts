@@ -1,26 +1,12 @@
-import { assertInstanceOf, assertLessOrEqual, assertMatch } from "@std/assert";
+import { assertInstanceOf, assertLessOrEqual, assertMatch, assertNotMatch } from "@std/assert";
 import { Dashboard } from "./dashboard.ts";
-import { Network } from "./network.ts";
 import { Train } from "./train.ts";
-import type { Inputs, Outputs } from "./train.ts";
+import { xor } from "./examples.ts";
+import type { Example } from "./examples.ts";
 
-// XOR training set
-const xs: Inputs = [
-  [0, 0],
-  [0, 1],
-  [1, 0],
-  [1, 1],
-];
-const ys: Outputs = [[0], [1], [1], [0]];
-
-const network: Network = new Network(2)
-  .dense(5)
-  .lrelu.dense(2)
-  .lrelu.dense(1).tanh;
-
-const train = new Train(network, xs, ys);
+const x: Example = xor();
+const train = new Train(x.network, x.inputs, x.outputs);
 train.epsilon = 0.01;
-// train.run(200000, 0.9);
 
 Deno.test("Instance", () => {
   const d = new Dashboard(train);
@@ -31,32 +17,34 @@ Deno.test("No iterations", () => {
   const d = new Dashboard(train);
   const v: string = d.render(0, []);
   assertMatch(v, /No data/);
-  // console.log(v);
 });
 
 Deno.test("Iteration 1", () => {
   const d = new Dashboard(train);
   const v: string = d.render(1, [1]);
   assertMatch(v, /No data/);
-  // console.log(v);
 });
 
 Deno.test("Iteration 2", () => {
   const d = new Dashboard(train);
   const v: string = d.render(2, [1, 2]);
-  // console.log(v);
+  assertNotMatch(v, /No data/);
 });
 
 Deno.test("Iteration 100", () => {
   const d = new Dashboard(train);
-  const v: string = d.render(100, Array(100).fill(0).map(_=>Math.random()));
-  // console.log(v);
+  const v: string = d.render(
+    100,
+    Array(100)
+      .fill(0)
+      .map((_) => Math.random())
+  );
+  assertNotMatch(v, /No data/);
 });
 
-Deno.test("Run Iterations", {ignore: false}, () => {
+Deno.test("Run Iterations", { ignore: false }, () => {
   const d = new Dashboard(train, 60, 10);
   const max = 2000;
   const iterations = d.run(max, 0.4, 10);
   assertLessOrEqual(iterations, max);
-  // console.log("Iterations: ", iterations);
 });

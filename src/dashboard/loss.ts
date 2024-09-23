@@ -45,7 +45,6 @@ export class Loss {
       .split("\n")
       .map((l) => l.replace(/ $/, ""))
       .join("\n");
-    // console.log({printable, stripped});
 
     return stripped;
   }

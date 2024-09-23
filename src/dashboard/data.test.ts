@@ -1,6 +1,6 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
 import { Column, Training } from "./data.ts";
-import type { Inputs, Outputs } from "./data.ts";
+import { xor } from "../examples.ts";
 
 Deno.test("Column Instance", () => {
   const c = new Column([]);
@@ -20,23 +20,15 @@ Deno.test("Distribution of points", () => {
   assertEquals(p, [1, 1.5, 2, 2.5, 3]);
 });
 
-
-// XOR training set
-const xs: Inputs = [
-  [0, 0],
-  [0, 1],
-  [1, 0],
-  [1, 1],
-];
-const ys: Outputs = [[0], [1], [1], [0]];
+const example = xor();
 
 Deno.test("Instance", () => {
-  const t = new Training(xs, ys, 0, 1, 0);
+  const t = new Training(example.inputs, example.outputs, 0, 1, 0);
   assertInstanceOf(t, Training);
 });
 
 Deno.test("Scatter", () => {
-  const t = new Training(xs, ys, 0, 1, 0);
+  const t = new Training(example.inputs, example.outputs, 0, 1, 0);
   const scatter = t.scatter(3, 3);
   assertEquals(scatter, [
     [0, 0],   [0.5, 0],   [1, 0],

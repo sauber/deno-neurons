@@ -11,14 +11,7 @@
   },
   "lock": false,
   "publish": {
-    "exclude": [
-      "src/*.test.ts"
-    ],
-    "include": [
-      "LICENSE",
-      "README.md",
-      "mod.ts",
-      "src/*.ts"
-    ]
+    "exclude": ["src/*.test.ts", "src/*/*.test.ts"],
+    "include": ["LICENSE", "README.md", "mod.ts", "src/*.ts", "src/*/*.ts"]
   }
 }

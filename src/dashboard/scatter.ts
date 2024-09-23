@@ -139,11 +139,6 @@ class XAxis {
   public render(): string[] {
     const low: string = this.low.toPrecision(2);
     const high: string = this.high.toPrecision(2);
-    // let bar: string = pad(this.width);
-    // bar = at(bar, low, this.start);
-    // bar = right(bar, high);
-    // bar = at(bar, this.name, this.start + (this.width - this.start) / 2);
-
     const bar = new BarLine(this.width)
       .at(this.start, low)
       .right(high)
@@ -197,15 +192,10 @@ class YAxis {
   public render(): string[] {
     const w: number = this.width; // Width
     const h: number = this.height; // Height
-    // const padding: string = pad(w);
     const padding = new BarLine(w).line;
     const lines: string[] = Array(h).fill(padding);
-    // lines[0] = padding.slice(0, w - this.highLabel.length) + this.highLabel;
     lines[0] = new BarLine(w).right(this.highLabel).line;
-    lines[Math.round((h - 1) / 2)] =
-      // padding.slice(0, w - this.name.length) + this.name;
-      new BarLine(w).center(this.name).line;
-    // lines[h - 1] = padding.slice(0, w - this.lowLabel.length) + this.lowLabel;
+    lines[Math.round((h - 1) / 2)] = new BarLine(w).center(this.name).line;
     lines[h - 1] = new BarLine(w).right(this.lowLabel).line;
     return lines;
   }

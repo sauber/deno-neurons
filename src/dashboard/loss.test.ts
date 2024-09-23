@@ -27,10 +27,10 @@ Deno.test("Chart of 2 items", () => {
 
 Deno.test("Chart of 100 items", () => {
   const l = new Loss(10, 4);
-  const data = Array(100).fill(0).map(_=>Math.random());
+  const data = Array(100)
+    .fill(0)
+    .map((_) => Math.random());
   const r = l.render(data);
-  // console.log(r);
   assertEquals(r.split("\n").length, 4, "Height 4");
   assertEquals(r.split("\n")[0].length, 10, "Width 10");
-
 });

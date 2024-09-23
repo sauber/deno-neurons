@@ -2,7 +2,7 @@ import { assertEquals } from "@std/assert";
 import { Relu } from "./layer.ts";
 import { Value } from "./value.ts";
 
-Deno.test("Rely Layer Activation", () => {
+Deno.test("Rely Activation Layer", () => {
   const l = new Relu();
   const cases = [
     [-1, 0],

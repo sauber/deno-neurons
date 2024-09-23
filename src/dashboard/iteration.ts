@@ -43,7 +43,6 @@ export class Iteration {
     const time = format(new Date(eta), "HH:mm:ss");
     const date = format(new Date(eta), "MM-dd");
     const today = format(new Date(), "MM-dd");
-    // console.log({ now, gone, ratio, remain, eta, time, date, today });
 
     if (date == today) return time;
     else return date + " " + time;
