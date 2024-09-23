@@ -1,4 +1,4 @@
-import { Network, Train, Dashboard } from "jsr:@sauber/neurons";
+import { Network, Train, Dashboard } from "jsr:@sauber/neurons@1.0.3";
 
 const network = new Network(2).dense(8).lrelu.dense(6).lrelu.dense(1).tanh;
 const inputs: number[][] = [];
