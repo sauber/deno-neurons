@@ -36,7 +36,7 @@ export class Loss {
     // Generate a graph
     // TODO: Better estimation of padding width
     const points: number[] = resample(history, this.width - 7);
-    const printable = plot(points, {
+    const printable: string = plot(points, {
       height: this.height - 1,
       padding: "      ",
     });
