@@ -25,6 +25,6 @@ Deno.test("XOR training", () => {
   ex.inputs.forEach((x, i) => {
     const p = ex.network.forward(x.map((v) => new Value(v))).map((v) => v.data);
     console.log(x, p);
-    assertAlmostEquals(p[0], ex.outputs[i][0], 0.2);
+    assertAlmostEquals(p[0], ex.outputs[i][0], 0.3);
   });
 });

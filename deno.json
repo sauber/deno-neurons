@@ -11,7 +11,10 @@
   },
   "lock": false,
   "publish": {
-    "exclude": ["src/*.test.ts", "src/*/*.test.ts"],
+    "exclude": [
+      "src/*.test.ts",
+      "src/*/*.test.ts"
+    ],
     "include": [
       "LICENSE",
       "README.md",

@@ -30,9 +30,7 @@ export class Dense extends Node {
   }
 
   public forward(x: Value[]): Value[] {
-    const outs: Value[] = [];
-    for (const neuron of this.neurons) outs.push(neuron.forward(x));
-    return outs;
+    return this.neurons.map(n=>n.forward(x));
   }
 
   public get parameters(): Value[] {

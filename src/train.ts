@@ -64,9 +64,7 @@ export class Train {
     const predict: Values = xs.map((line: Value[]) =>
       this.network.forward(line)
     );
-    // this.network.print();
     const loss = Train.MeanSquareError(ys, predict);
-    // console.log('Iteration', n, 'loss', loss.data);
     if (isNaN(loss.data) || loss.data > 1000000) {
       loss.print();
       throw new Error("Loss inclined to infinity");
