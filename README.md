@@ -2,11 +2,9 @@
 
 Pure-deno implementation of neural network.
 
-Based on MicrogradTS: https://github.com/trekhleb/micrograd-ts
-
 ## Example
 
-Neural network to recognize a circle wave. Watch the training on an ascii dashboard.
+Neural network to recognize a circular wave.
 
 ```ts
 import { Network, Train, Dashboard } from "jsr:@sauber/neurons";
@@ -25,10 +23,14 @@ train.epsilon = 0.01;
 const dashboard = new Dashboard(train, 78, 16);
 const max_iteration = 20000;
 const learning_rate = 0.2;
-const redraw = 100;
-dashboard.run(max_iteration, learning_rate, redraw);
+const count = train.run(max_iteration, learning_rate);
+console.log("Network trained in", count, "iterations.");
 ```
 
-Output could look like this:
+## See Also
 
-[![asciicast](https://asciinema.org/a/OoCv41j7RrP0LIxI0rVEuzsCu.svg)](https://asciinema.org/a/OoCv41j7RrP0LIxI0rVEuzsCu)
+Use [ML-CLI-Dashboard](https://github.com/sauber/deno-dashboard) for ascii dashboard visualization during training.
+
+## Credits
+
+Based on [MicrogradTS](https://github.com/trekhleb/micrograd-ts)

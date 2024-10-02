@@ -4,16 +4,12 @@ import { Train } from "./train.ts";
 import { Value } from "./value.ts";
 import { xor } from "./examples.ts";
 
-
 Deno.test("Initialize", () => {
   const network = new Network(0);
   const train = new Train(network, [], []);
   assertInstanceOf(train, Train);
 });
 
-// In theory Dense(2), Sigmoid, Dense(1) should be enough,
-// but takes a long time to train, and often doesn't find the solution.
-// A much larger network using relu is faster and higher chance of success.
 Deno.test("XOR training", () => {
   const ex = xor();
 
