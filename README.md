@@ -34,3 +34,7 @@ Use [ML-CLI-Dashboard](https://github.com/sauber/deno-dashboard) for ascii dashb
 ## Credits
 
 Based on [MicrogradTS](https://github.com/trekhleb/micrograd-ts)
+
+## License
+
+See [LICENSE](./LICENSE).
