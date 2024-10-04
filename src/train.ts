@@ -66,8 +66,8 @@ export class Train {
     );
     const loss = Train.MeanSquareError(ys, predict);
     if (isNaN(loss.data) || loss.data > 1000000) {
-      loss.print();
-      throw new Error("Loss inclined to infinity");
+      // loss.print();
+      throw new Error(`Loss inclined to infinity: ${loss.data}`);
     }
     this.lossHistory.push(loss.data);
 
