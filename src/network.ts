@@ -115,7 +115,7 @@ export class Network extends Node {
     return this.add(new Dense(inputs, outputs));
   }
 
-  public simple(): Network {
+  public get simple(): Network {
     const inputs: number = this.outputs;
     return this.add(new Simple(inputs));
   }
