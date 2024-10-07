@@ -1,5 +1,13 @@
 import { Value } from "./value.ts";
-import { Dense, LRelu, Normalize, Relu, Sigmoid, Tanh } from "./layer.ts";
+import {
+  Dense,
+  LRelu,
+  Normalize,
+  Relu,
+  Sigmoid,
+  Simple,
+  Tanh,
+} from "./layer.ts";
 import type { DenseData } from "./layer.ts";
 import { Node } from "./node.ts";
 
@@ -21,7 +29,7 @@ export type TrainingData = number[][];
 export class Network extends Node {
   constructor(
     private readonly inputs: number,
-    private readonly layers: Layers = [],
+    private readonly layers: Layers = []
   ) {
     super();
   }
@@ -105,6 +113,11 @@ export class Network extends Node {
   public dense(outputs: number): Network {
     const inputs: number = this.outputs;
     return this.add(new Dense(inputs, outputs));
+  }
+
+  public simple(): Network {
+    const inputs: number = this.outputs;
+    return this.add(new Simple(inputs));
   }
 
   public get relu(): Network {
