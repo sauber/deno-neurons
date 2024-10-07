@@ -19,4 +19,6 @@ Deno.test("Simple Layer", () => {
   const s = new Simple(2);
   assertEquals(s.parameters.length, 4);
   assertEquals(s.export.length, 2);
+  const predict = s.forward([0, 0].map((v) => new Value(v)));
+  assertEquals(predict.length, 2);
 });

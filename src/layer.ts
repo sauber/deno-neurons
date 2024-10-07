@@ -28,7 +28,7 @@ export class Simple extends Node {
   }
 
   public forward(x: Value[]): Value[] {
-    return this.neurons.map((n) => n.forward(x));
+    return this.neurons.map((n, i) => n.forward([x[i]]));
   }
 
   public get parameters(): Value[] {
@@ -65,6 +65,7 @@ export class Dense extends Node {
 
   public forward(x: Value[]): Value[] {
     return this.neurons.map((n) => n.forward(x));
+
   }
 
   public get parameters(): Value[] {

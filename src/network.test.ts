@@ -20,6 +20,14 @@ Deno.test("Add Dense Layer", () => {
   assertEquals(output, []);
 });
 
+Deno.test("Add Simple Layer", () => {
+  const n = new Network(2);
+  const s: Network = n.simple;
+  console.log(s.export);
+  const output: number[] = s.predict([0,0]);
+  assertEquals(output.length, 2);
+});
+
 Deno.test("Hidden and output layer", () => {
   const n = new Network(2);
   const d: Network = n.dense(2).dense(1);

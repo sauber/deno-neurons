@@ -70,7 +70,7 @@ export class Network extends Node {
       inputs: this.inputs,
       layers: this.layers.map((l) => {
         const type: string = l.constructor.name;
-        return type === "Dense"
+        return type === "Dense" || type === "Simple"
           ? { type, neurons: l.export as DenseData }
           : { type };
       }),
