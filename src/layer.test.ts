@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { Relu } from "./layer.ts";
+import { Relu, Simple } from "./layer.ts";
 import { Value } from "./value.ts";
 
 Deno.test("Rely Activation Layer", () => {
@@ -13,4 +13,10 @@ Deno.test("Rely Activation Layer", () => {
     const predict = l.forward([new Value(c[0])]);
     assertEquals(predict[0].data, c[1]);
   });
+});
+
+Deno.test("Simple Layer", () => {
+  const s = new Simple(2);
+  assertEquals(s.parameters.length, 4);
+  assertEquals(s.export.length, 2);
 });
