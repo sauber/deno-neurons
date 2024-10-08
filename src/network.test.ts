@@ -13,17 +13,17 @@ Deno.test("No layers", () => {
   assertEquals(input, output);
 });
 
-Deno.test("Add Dense Layer", () => {
+Deno.test("Dense Layer", () => {
   const n = new Network(0);
   const d: Network = n.dense(0);
   const output: number[] = d.predict([]);
   assertEquals(output, []);
 });
 
-Deno.test("Add Simple Layer", () => {
+Deno.test("Simple Layer", () => {
   const n = new Network(2);
   const s: Network = n.simple;
-  console.log(s.export);
+  // console.log(s.export);
   const output: number[] = s.predict([0,0]);
   assertEquals(output.length, 2);
 });

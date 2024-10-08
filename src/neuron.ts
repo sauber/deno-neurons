@@ -6,18 +6,26 @@ export type NeuronData = {
   weights: Array<number>;
 };
 
+export type SimpleData = {
+  bias: number;
+  weight: number;
+};
+
+
+/** Random Value between -1 and +1 */
+function randomValue(): Value {
+  return new Value(Math.random() * 2 - 1, { op: "🔀" });
+}
+
 /** Neuron node with multiple weighted inputs and bias */
 export class Neuron extends Node {
-  private static randomValue(): Value {
-    return new Value(Math.random() * 2 - 1, { op: "🔀" });
-  }
 
   constructor(
     public readonly inputs: number,
-    private readonly bias: Value = Neuron.randomValue(),
+    private readonly bias: Value = randomValue(),
     private readonly weights: Array<Value> = Array.from(
       Array(inputs),
-      (_) => Neuron.randomValue(),
+      (_) => randomValue(),
     ),
   ) {
     super();
@@ -94,5 +102,43 @@ export class Scaler extends Node {
    */
   public get parameters(): Value[] {
     return [];
+  }
+}
+
+/** Neuron node with multiple weighted inputs and bias */
+export class Rescaler extends Node {
+  private static randomValue(): Value {
+    return new Value(Math.random() * 2 - 1, { op: "🔀" });
+  }
+
+  constructor(
+    private readonly bias: Value = randomValue(),
+    private readonly weight: Value = randomValue(),
+  ) {
+    super();
+  }
+
+  /** Re-initialize a pre-trained neuron */
+  public static import(data: SimpleData): Rescaler {
+    const bias = new Value(data.bias);
+    const weight = new Value(data.weight);
+    return new Rescaler(bias, weight);
+  }
+
+  /** Export bias and weights */
+  public get export(): SimpleData {
+    return {
+      bias: this.bias.data,
+      weight: this.weight.data,
+    };
+  }
+
+  /** Add bias before factor */
+  public forward(input: Value): Value {
+    return input.add(this.bias).mul(this.weight);
+  }
+
+  public get parameters(): Value[] {
+    return [this.weight, this.bias];
   }
 }

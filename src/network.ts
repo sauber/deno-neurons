@@ -1,23 +1,26 @@
 import { Value } from "./value.ts";
-import {
-  Dense,
-  LRelu,
-  Normalize,
-  Relu,
-  Sigmoid,
-  Simple,
-  Tanh,
-} from "./layer.ts";
+import { Dense, Simple, Relu, LRelu, Tanh, Sigmoid } from "./layer.ts";
 import type { DenseData } from "./layer.ts";
 import { Node } from "./node.ts";
+import type { NeuronData } from "./neuron.ts";
 
-type Layer = Dense | Relu | LRelu | Sigmoid | Tanh;
+// type SimpleNeuronData = { bias: number; weight: number };
+// type DenseNeuronData = { bias: number; weights: Array<number> };
+type ActivationLayer = "Relu" | "LRelu" | "Sigmoid" | "Tanh";
+type DenseLayer = { Dense: Array<NeuronData> };
+type SimpleLayer = { Simple: Array<NeuronData> };
+type NeuronLayer = DenseLayer | SimpleLayer;
+
+type Layer = Dense | Relu | LRelu | Sigmoid | Tanh | Simple;
+// type Layer = NeuronLayer | ActivationLayer;
 type Layers = Array<Layer>;
 
-type LayerData = {
-  type: string;
-  neurons?: DenseData;
-};
+// type LayerData = {
+//   type: string;
+//   data?: Array<unknown>;
+// };
+
+type LayerData = ActivationLayer | NeuronLayer;
 
 export type NetworkData = {
   inputs: number;
@@ -35,46 +38,72 @@ export class Network extends Node {
   }
 
   public static import(data: NetworkData): Network {
-    let inputs: number = data.inputs;
+    // let inputs: number = data.inputs;
     const layers: Layers = [];
     data.layers.forEach((layer) => {
-      switch (layer.type) {
-        case "Dense": {
-          const neurons = layer.neurons as DenseData;
-          inputs = neurons.length;
-          layers.push(Dense.import(neurons));
-          break;
+      if (typeof layer === "string") {
+        switch (layer) {
+          case "Relu":
+            layers.push(new Relu());
+            break;
+          case "LRelu":
+            layers.push(new LRelu());
+            break;
+          case "Sigmoid":
+            layers.push(new Sigmoid());
+            break;
+          case "Tanh":
+            layers.push(new Tanh());
+            break;
         }
-        case "Relu":
-          layers.push(new Relu());
-          break;
-        case "LRelu":
-          layers.push(new LRelu());
-          break;
-        case "Sigmoid":
-          layers.push(new Sigmoid());
-          break;
-        case "Tanh":
-          layers.push(new Tanh());
-          break;
-        case "Normalize":
-          layers.push(new Normalize(inputs));
-          break;
+      } else {
+        Object.entries(layer).forEach(([type, neurons]) => {
+          switch (type) {
+            case "Dense":
+              // inputs = neurons.length;
+              layers.push(Dense.import(neurons));
+              break;
+            case "Simple":
+              layers.push(Simple.import(neurons));
+              break;
+          }
+        });
       }
     });
+
+    // case "Rescale": {
+    //   const rescalers = layer.data;
+    //   layers.push(Simple.import(rescalers));
+    //   break;
+    // }
+    // case "Normalize":
+    //   layers.push(new Normalize(inputs));
+    //   break;
+
     return new Network(data.inputs, layers);
   }
 
   public get export(): NetworkData {
-    return {
-      inputs: this.inputs,
-      layers: this.layers.map((l) => {
-        const type: string = l.constructor.name;
-        return type === "Dense" || type === "Simple"
-          ? { type, neurons: l.export as DenseData }
-          : { type };
-      }),
-    };
+    const layers: Array<LayerData> = [];
+    this.layers.forEach((layer: Layer) => {
+      const type: string = layer.constructor.name;
+      switch (type) {
+        case "Dense":
+          layers.push({ Dense: layer.export as DenseData });
+          break;
+        case "Simple":
+          layers.push({ Simple: layer.export as DenseData });
+          break;
+        case "LRelu":
+        case "Relu":
+        case "Sigmoid":
+        case "Tanh":
+          layers.push(type);
+          break;
+      }
+    });
+
+    return { inputs: this.inputs, layers };
   }
 
   public get parameters(): Value[] {
@@ -136,7 +165,11 @@ export class Network extends Node {
     return this.add(new Tanh());
   }
 
-  public get normalize(): Network {
-    return this.add(new Normalize(this.inputs));
-  }
+  // public get normalize(): Network {
+  //   return this.add(new Normalize(this.inputs));
+  // }
+
+  // public get rescale(): Network {
+  //   return this.add(new Rescale(this.inputs));
+  // }
 }

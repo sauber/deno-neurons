@@ -1,6 +1,6 @@
 import type { Value } from "./value.ts";
 import { Node } from "./node.ts";
-import { Neuron, Scaler } from "./neuron.ts";
+import { Neuron, Scaler, Rescaler } from "./neuron.ts";
 import type { NeuronData } from "./neuron.ts";
 
 export type DenseData = Array<NeuronData>;
@@ -19,10 +19,9 @@ export class Simple extends Node {
 
   public static import(data: DenseData): Simple {
     const neurons = data.map((data) => Neuron.import(data));
-    const inputs = neurons[0].inputs;
-    return new Simple(inputs, neurons);
+    return new Simple(neurons.length, neurons);
   }
-  
+
   public get export(): DenseData {
     return this.neurons.map((n) => n.export);
   }
@@ -36,7 +35,6 @@ export class Simple extends Node {
     for (const neuron of this.neurons) params.push(...neuron.parameters);
     return params;
   }
-
 }
 
 /** All nodes in input layer connected to all nodes in output layer */
@@ -54,7 +52,7 @@ export class Dense extends Node {
 
   public static import(data: DenseData): Dense {
     const neurons = data.map((data) => Neuron.import(data));
-    const inputs = neurons[0].inputs;
+    const inputs = neurons[0]?.inputs || 0;
     const outputs = neurons.length;
     return new Dense(inputs, outputs, neurons);
   }
@@ -65,7 +63,6 @@ export class Dense extends Node {
 
   public forward(x: Value[]): Value[] {
     return this.neurons.map((n) => n.forward(x));
-
   }
 
   public get parameters(): Value[] {
@@ -116,5 +113,21 @@ export class Normalize extends Node {
 
   public forward(x: Value[]): Value[] {
     return this.scalers.map((scaler, index) => scaler.forward(x[index]));
+  }
+}
+
+export class Rescale extends Node {
+  constructor(
+    public readonly inputs: number,
+    private readonly rescalers: Array<Rescaler> = Array.from(
+      Array(inputs),
+      (_) => new Rescaler()
+    )
+  ) {
+    super();
+  }
+
+  public forward(x: Value[]): Value[] {
+    return this.rescalers.map((rescaler, index) => rescaler.forward(x[index]));
   }
 }
