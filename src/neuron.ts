@@ -6,11 +6,9 @@ export type NeuronData = {
   weights: Array<number>;
 };
 
-export type SimpleData = {
-  bias: number;
-  weight: number;
+export type ScalerData = {
+  max: number;
 };
-
 
 /** Random Value between -1 and +1 */
 function randomValue(): Value {
@@ -19,14 +17,12 @@ function randomValue(): Value {
 
 /** Neuron node with multiple weighted inputs and bias */
 export class Neuron extends Node {
-
   constructor(
     public readonly inputs: number,
     private readonly bias: Value = randomValue(),
-    private readonly weights: Array<Value> = Array.from(
-      Array(inputs),
-      (_) => randomValue(),
-    ),
+    private readonly weights: Array<Value> = Array.from(Array(inputs), (_) =>
+      randomValue()
+    )
   ) {
     super();
   }
@@ -50,14 +46,14 @@ export class Neuron extends Node {
   public forward(inputs: Value[]): Value {
     if (inputs.length != this.weights.length) {
       throw new Error(
-        `Wrong number of input. Got ${inputs.length}, Expected ${this.weights.length}.`,
+        `Wrong number of input. Got ${inputs.length}, Expected ${this.weights.length}.`
       );
     }
     return sum(
       ...inputs.map((input: Value, index: number) =>
         input.mul(this.weights[index])
       ),
-      this.bias,
+      this.bias
     );
   }
 
@@ -92,9 +88,10 @@ export class Scaler extends Node {
 
     // Scale input value to a:b
     // Scaling formula: (b-a) * (v-min) / (max-min) + a
-    return new Value(this.b - this.a).mul(v.sub(this.min)).div(
-      this.max - this.min,
-    ).add(this.a);
+    return new Value(this.b - this.a)
+      .mul(v.sub(this.min))
+      .div(this.max - this.min)
+      .add(this.a);
   }
 
   /** Parameters
@@ -107,38 +104,32 @@ export class Scaler extends Node {
 
 /** Neuron node with multiple weighted inputs and bias */
 export class Rescaler extends Node {
-  private static randomValue(): Value {
-    return new Value(Math.random() * 2 - 1, { op: "🔀" });
-  }
+  private readonly cache = { data: 0 };
+  private readonly factor: Value;
 
-  constructor(
-    private readonly bias: Value = randomValue(),
-    private readonly weight: Value = randomValue(),
-  ) {
+  constructor(private readonly max: number = 1) {
     super();
+    this.cache.data = max;
+    this.factor = new Value(max);
   }
 
   /** Re-initialize a pre-trained neuron */
-  public static import(data: SimpleData): Rescaler {
-    const bias = new Value(data.bias);
-    const weight = new Value(data.weight);
-    return new Rescaler(bias, weight);
+  public static import(data: ScalerData): Rescaler {
+    return new Rescaler(data.max);
   }
 
   /** Export bias and weights */
-  public get export(): SimpleData {
-    return {
-      bias: this.bias.data,
-      weight: this.weight.data,
-    };
+  public get export(): ScalerData {
+    return { max: this.max };
   }
 
-  /** Add bias before factor */
+  /** Add bias before factoring */
   public forward(input: Value): Value {
-    return input.add(this.bias).mul(this.weight);
+    // return input.add(this.bias).mul(this.weight);
+    return input.rescale(this.factor, this.cache);
   }
 
   public get parameters(): Value[] {
-    return [this.weight, this.bias];
+    return [this.factor];
   }
 }

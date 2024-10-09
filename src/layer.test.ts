@@ -1,8 +1,9 @@
 import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Dense, LRelu, Relu, Sigmoid, Simple, Tanh } from "./layer.ts";
+import { Dense, LRelu, Relu, Rescale, Scale, Sigmoid, Simple, Tanh } from "./layer.ts";
 import { Network } from "./network.ts";
 import type { NetworkData } from "./network.ts";
-import type { DenseData } from "./layer.ts";
+import type { DenseData, SimpleData } from "./layer.ts";
+import { ScalerData } from "./neuron.ts";
 
 ////////////////////////////////////////////////////////////////////////
 /// Relu Layer
@@ -148,4 +149,55 @@ Deno.test("Dense activation", () => {
   const n = Network.import(data);
   const o = n.predict([0]);
   assertEquals(o, [0]);
+});
+
+////////////////////////////////////////////////////////////////////////
+/// Rescale Layer
+////////////////////////////////////////////////////////////////////////
+
+Deno.test("Rescale Instance", () => {
+  assertInstanceOf(new Rescale(0), Rescale);
+});
+
+Deno.test("Rescale Import/export", () => {
+  const data: NetworkData = {
+    inputs: 1,
+    layers: [{ Rescale: [{ max: 1 }] }],
+  };
+
+  const network: Network = Network.import(data);
+  const exported: NetworkData = network.export;
+  assertEquals(exported, data);
+});
+
+Deno.test("Rescale activation", () => {
+  const n = new Network(1).rescale;
+  const o = n.predict([0]);
+  assertEquals(o.length, 1);
+});
+
+
+////////////////////////////////////////////////////////////////////////
+/// Scale Layer
+////////////////////////////////////////////////////////////////////////
+
+Deno.test("Scale Instance", () => {
+  assertInstanceOf(new Scale([]), Scale);
+});
+
+Deno.test("Scale Import/export", () => {
+  const data: NetworkData = {
+    inputs: 1,
+    layers: [{ Scale: [{ offset: 1, factor: 1 }] }],
+  };
+
+  const network: Network = Network.import(data);
+  const exported: NetworkData = network.export;
+  assertEquals(exported, data);
+});
+
+Deno.test("Scale activation", () => {
+  const n = new Network(1).scale([{offset: 1, factor: 1}]);
+  const o = n.predict([0]);
+  assertEquals(o.length, 1);
 });

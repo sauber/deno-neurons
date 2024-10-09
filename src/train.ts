@@ -5,6 +5,18 @@ export type Inputs = number[][];
 export type Outputs = number[][];
 export type Values = Value[][];
 
+export function MeanSquareError(a: Values, b: Values): Value {
+  const squares: Value[] = a
+    .map((line: Value[], row: number) =>
+      line.map((val: Value, col: number) => val.sub(b[row][col]).pow(2))
+    )
+    .flat();
+  // const count: Value = new Value(a.length);
+  const mean: Value = sum(...squares).mul(new Value(1/a.length)).pow(0.5);
+  return mean;
+}
+
+
 /** Train a neural network */
 export class Train {
   private readonly lossHistory: number[] = [];
@@ -32,16 +44,6 @@ export class Train {
     this.ys = outputs.map((row) => row.map((v) => new Value(v)));
   }
 
-  private static MeanSquareError(a: Values, b: Values): Value {
-    const squares: Value[] = a
-      .map((line: Value[], row: number) =>
-        line.map((val: Value, col: number) => val.sub(b[row][col]).pow(2))
-      )
-      .flat();
-    const count: Value = new Value(a.length);
-    const mean: Value = sum(...squares).div(count);
-    return mean;
-  }
 
   /** Pick random samples for training */
   private batch(): [Values, Values] {
@@ -64,7 +66,7 @@ export class Train {
     const predict: Values = xs.map((line: Value[]) =>
       this.network.forward(line)
     );
-    const loss = Train.MeanSquareError(ys, predict);
+    const loss = MeanSquareError(ys, predict);
     if (isNaN(loss.data) || loss.data > 1000000) {
       // loss.print();
       throw new Error(`Loss inclined to infinity: ${loss.data}`);

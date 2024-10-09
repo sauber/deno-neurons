@@ -30,6 +30,7 @@ export class Value {
 
   public backwardStep() {}
 
+  /** Add */
   public add(v: Value | number): Value {
     const other = this.toVal(v);
     const out = new Value(this.data + other.data, {
@@ -43,6 +44,7 @@ export class Value {
     return out;
   }
 
+  /** Subtract */
   public sub(v: Value | number): Value {
     const other = this.toVal(v);
     const out = new Value(this.data - other.data, {
@@ -56,6 +58,7 @@ export class Value {
     return out;
   }
 
+  /** Multiply */
   public mul(v: Value | number): Value {
     const other = this.toVal(v);
     const out = new Value(this.data * other.data, {
@@ -69,6 +72,7 @@ export class Value {
     return out;
   }
 
+  /** Divide */
   public div(v: Value | number): Value {
     const other = this.toVal(v);
     const out = new Value(this.data / other.data, {
@@ -91,6 +95,7 @@ export class Value {
     return out;
   }
 
+  /** Raise to power of */
   public pow(other: number): Value {
     if (typeof other !== "number") {
       throw new Error("Only supporting int/float powers");
@@ -105,6 +110,7 @@ export class Value {
     return out;
   }
 
+  /** Exponential */
   public exp(): Value {
     const out = new Value(Math.exp(this.data), { prev: [this], op: "e" });
     out.backwardStep = () => {
@@ -113,6 +119,7 @@ export class Value {
     return out;
   }
 
+  /** Sigmoid function */
   public sigmoid(): Value {
     // Sigmoid
     const s = (x: number) => 1 / (1 + Math.exp(-x));
@@ -127,12 +134,14 @@ export class Value {
     return out;
   }
 
+  /** Hyperbolic tangent */
   public tanh(): Value {
     const out = new Value(Math.tanh(this.data), { prev: [this], op: "tanh" });
     out.backwardStep = () => (this.grad += (1 - out.data ** 2) * out.grad);
     return out;
   }
 
+  /** Rectified linear unit activation function */
   public relu(): Value {
     const reluVal = this.data < 0 ? 0 : this.data;
     const out = new Value(reluVal, { prev: [this], op: "relu" });
@@ -140,6 +149,7 @@ export class Value {
     return out;
   }
 
+  /** Leaky rectified linear unit activation function */
   public lrelu(): Value {
     const reluVal = this.data < 0 ? 0.01 * this.data : this.data;
     const out = new Value(reluVal, { prev: [this], op: "lrelu" });
@@ -148,6 +158,31 @@ export class Value {
     return out;
   }
 
+  /** Autoscale value to -1:1 */
+  public rescale(factor: Value, cache: {data: number}): Value {
+    // Record larges observed value
+    cache.data = Math.max(Math.abs(this.data), cache.data);
+    console.log('rescale forward: ', {cache}, factor.data);
+
+    // Scaled from current max
+    const out = new Value(this.data / factor.data, { prev: [this], op: "⚖️" });
+    out.backwardStep = () => {
+      console.log('rescale backwards: ', {cache}, factor.data, out.grad);
+      factor.data += (cache.data-factor.data)/10;
+
+      // this.grad += other.data * out.grad;
+      // other.grad += this.data * out.grad;
+
+      this.grad += 1/factor.data * out.grad;
+      // this.grad += 1;
+      factor.grad += 1/this.data * out.grad;
+      console.log('grads: ', {this: this.grad, factor: factor.grad, out: out.grad});
+
+    }
+    return out;
+  }
+
+  /** Backwards propagation of gradients */
   public backward(): void {
     // Topological order of all the children in the graph.
     const topo: Values = [];
