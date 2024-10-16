@@ -196,7 +196,7 @@ Deno.test("Normalize Adapt", () => {
     const col = output.map((r) => r[index]);
     const mean = avg(col);
     const variance = std(col);
-    assertAlmostEquals(mean, 0);
-    assertAlmostEquals(variance, 1);
+    assertAlmostEquals(mean, 0, 1e-15);
+    assertAlmostEquals(variance, 1, 1e-15);
   });
 });
