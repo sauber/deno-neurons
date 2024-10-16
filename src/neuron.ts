@@ -36,7 +36,7 @@ export class Neuron extends Node {
   }
 
   /** Export bias and weights */
-  public get export(): NeuronData {
+  public override  get export(): NeuronData {
     return {
       bias: this.bias.data,
       weights: this.weights.map((v: Value) => v.data),
@@ -58,7 +58,7 @@ export class Neuron extends Node {
     );
   }
 
-  public get parameters(): Value[] {
+  public override get parameters(): Value[] {
     return [...this.weights, this.bias];
   }
 }
@@ -84,7 +84,7 @@ export class Normalizer extends Node {
   }
 
   /** Export bias and weights */
-  public get export(): NormalizerData {
+  public override get export(): NormalizerData {
     return { mean: this.mean.data, variance: this.variance.data };
   }
 }

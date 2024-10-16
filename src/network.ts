@@ -78,7 +78,7 @@ export class Network extends Node {
     return new Network(data.inputs, layers);
   }
 
-  public get export(): NetworkData {
+  public override get export(): NetworkData {
     const layers: Array<LayerData> = [];
     this.layers.forEach((layer: Layer) => {
       const type: string = layer.constructor.name;
@@ -104,7 +104,7 @@ export class Network extends Node {
     return { inputs: this.inputs, layers };
   }
 
-  public get parameters(): Value[] {
+  public override get parameters(): Value[] {
     const params: Value[] = [];
     this.layers.forEach((layer: Layer) => params.push(...layer.parameters));
     return params;

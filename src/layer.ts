@@ -34,7 +34,7 @@ export class Simple extends Node {
     return new Simple(neurons.length, neurons);
   }
 
-  public get export(): DenseData {
+  public override get export(): DenseData {
     return this.neurons.map((n) => n.export);
   }
 
@@ -42,7 +42,7 @@ export class Simple extends Node {
     return this.neurons.map((n, i) => n.forward([x[i]]));
   }
 
-  public get parameters(): Value[] {
+  public override get parameters(): Value[] {
     const params: Value[] = [];
     for (const neuron of this.neurons) params.push(...neuron.parameters);
     return params;
@@ -69,7 +69,7 @@ export class Dense extends Node {
     return new Dense(inputs, outputs, neurons);
   }
 
-  public get export(): DenseData {
+  public override get export(): DenseData {
     return this.neurons.map((n) => n.export);
   }
 
@@ -77,7 +77,7 @@ export class Dense extends Node {
     return this.neurons.map((n) => n.forward(x));
   }
 
-  public get parameters(): Value[] {
+  public override get parameters(): Value[] {
     const params: Value[] = [];
     for (const neuron of this.neurons) params.push(...neuron.parameters);
     return params;
@@ -129,7 +129,7 @@ export class Normalize extends Node {
   }
 
   /** Calculate means and variance of input, and set offset and factor accordingly */
-  public adapt(inputs: Inputs): void {
+  public override  adapt(inputs: Inputs): void {
     inputs[0].forEach((_, index) => {
       const col: number[] = inputs.map((r) => r[index]);
       const mean: number = avg(col);
@@ -143,7 +143,7 @@ export class Normalize extends Node {
   }
 
   /** Export layer of normalizers */
-  public get export(): DeviationData {
+  public override get export(): DeviationData {
     return this.scalers.map((s) => s.export);
   }
 
