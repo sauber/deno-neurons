@@ -1,6 +1,6 @@
 {
   "name": "@sauber/neurons",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "exports": "./mod.ts",
   "imports": {
     "@sauber/statistics": "jsr:@sauber/statistics@^0.3.1",

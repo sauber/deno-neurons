@@ -17,9 +17,8 @@ export function MeanSquareError(a: Values, b: Values): Value {
       line.map((val: Value, col: number) => val.sub(b[row][col]).pow(2))
     )
     .flat();
-  const mean: Value = sum(...squares)
-    .mul(new Value(1 / a.length))
-    .pow(0.5);
+  const count: Value = new Value(a.length);
+  const mean: Value = sum(...squares).div(count);
   return mean;
 }
 
