@@ -1,11 +1,13 @@
 import { sum, Value } from "./value.ts";
 import { Node } from "./node.ts";
 
+/** JSON format of exported neuron parameters */
 export type NeuronData = {
   bias: number;
   weights: Array<number>;
 };
 
+/** JSON format of exported normalizer parameters */
 export type NormalizerData = {
   mean: number;
   variance: number;

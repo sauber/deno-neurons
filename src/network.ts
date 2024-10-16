@@ -11,8 +11,6 @@ import {
 import type { DenseData, DeviationData } from "./layer.ts";
 import { Node } from "./node.ts";
 
-// type SimpleNeuronData = { bias: number; weight: number };
-// type DenseNeuronData = { bias: number; weights: Array<number> };
 type ActivationLayer = "Relu" | "LRelu" | "Sigmoid" | "Tanh";
 type DenseLayer = { Dense: DenseData };
 type SimpleLayer = { Simple: DenseData };
@@ -24,13 +22,13 @@ type Layers = Array<Layer>;
 
 type LayerData = ActivationLayer | NeuronLayer | NormalizeLayer;
 
+/** Network parameters exported in JSON format */
 export type NetworkData = {
   inputs: number;
   layers: Array<LayerData>;
 };
 
-export type TrainingData = number[][];
-
+/** Sequence of layers and function to predict output */
 export class Network extends Node {
   constructor(
     private readonly inputs: number,

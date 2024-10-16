@@ -1,21 +1,27 @@
 import { sum, Value } from "./value.ts";
 import type { Network } from "./network.ts";
 
+/** Array of rows of input data */
 export type Inputs = number[][];
+
+/** Array of rows of output data */
 export type Outputs = number[][];
+
+/** Input or output data type casted to Value objects */
 export type Values = Value[][];
 
+/** Calculate mean square error for a batch of actual vs expected outputs */
 export function MeanSquareError(a: Values, b: Values): Value {
   const squares: Value[] = a
     .map((line: Value[], row: number) =>
       line.map((val: Value, col: number) => val.sub(b[row][col]).pow(2))
     )
     .flat();
-  // const count: Value = new Value(a.length);
-  const mean: Value = sum(...squares).mul(new Value(1/a.length)).pow(0.5);
+  const mean: Value = sum(...squares)
+    .mul(new Value(1 / a.length))
+    .pow(0.5);
   return mean;
 }
-
 
 /** Train a neural network */
 export class Train {
@@ -43,7 +49,6 @@ export class Train {
     this.xs = inputs.map((row) => row.map((v) => new Value(v)));
     this.ys = outputs.map((row) => row.map((v) => new Value(v)));
   }
-
 
   /** Pick random samples for training */
   private batch(): [Values, Values] {

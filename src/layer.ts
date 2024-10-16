@@ -15,7 +15,6 @@ type Offset = {
   offset: number;
   factor: number;
 };
-export type ScaleData = Array<Offset>;
 
 /** Connect one input to one output */
 export class Simple extends Node {
