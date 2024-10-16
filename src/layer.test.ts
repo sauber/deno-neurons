@@ -173,7 +173,7 @@ Deno.test("Normalize Instance", () => {
   assertInstanceOf(new Normalize(0), Normalize);
 });
 
-Deno.test("Normalize Adapt", () => {
+Deno.test("Normalize Layer Adapt", () => {
   const input: Inputs = [
     [0.1, 1400],
     [0.01, 1300],
@@ -190,6 +190,30 @@ Deno.test("Normalize Adapt", () => {
   const output = input.map((i) =>
     l.forward(i.map((n) => v(n))).map((o) => o.data)
   );
+
+  // Confirm column by column mean==0, variance==1
+  output[0].forEach((_, index) => {
+    const col = output.map((r) => r[index]);
+    const mean = avg(col);
+    const variance = std(col);
+    assertAlmostEquals(mean, 0, 1e-15);
+    assertAlmostEquals(variance, 1, 1e-15);
+  });
+});
+
+Deno.test("Normalize Network Adapt", () => {
+  const input: Inputs = [
+    [0.1, 1400],
+    [0.01, 1300],
+    [0.055, 1350],
+  ];
+
+  // Adapt, export and import
+  const network = new Network(2).normalize;
+  network.adapt(input);
+
+  // Confirm stddev of input after adaption
+  const output = input.map((i) => network.predict(i));
 
   // Confirm column by column mean==0, variance==1
   output[0].forEach((_, index) => {

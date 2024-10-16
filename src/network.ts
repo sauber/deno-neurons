@@ -10,6 +10,7 @@ import {
 } from "./layer.ts";
 import type { DenseData, DeviationData } from "./layer.ts";
 import { Node } from "./node.ts";
+import { Inputs } from "./train.ts";
 
 type ActivationLayer = "Relu" | "LRelu" | "Sigmoid" | "Tanh";
 type DenseLayer = { Dense: DenseData };
@@ -163,5 +164,9 @@ export class Network extends Node {
 
   public get normalize(): Network {
     return this.add(new Normalize(this.inputs));
+  }
+
+  public override adapt(input: Inputs): void {
+    this.layers.forEach((l) => l.adapt(input));
   }
 }
