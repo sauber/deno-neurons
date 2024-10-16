@@ -1,6 +1,6 @@
 {
   "name": "@sauber/neurons",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "exports": "./mod.ts",
   "imports": {
     "@sauber/statistics": "jsr:@sauber/statistics@^0.3.1",
@@ -8,15 +8,7 @@
   },
   "lock": false,
   "publish": {
-    "exclude": [
-      "src/*.test.ts"
-    ],
-    "include": [
-      "LICENSE",
-      "README.md",
-      "mod.ts",
-      "example.ts",
-      "src/*.ts"
-    ]
+    "exclude": ["src/*.test.ts"],
+    "include": ["LICENSE", "README.md", "mod.ts", "example.ts", "src/*.ts"]
   }
 }
