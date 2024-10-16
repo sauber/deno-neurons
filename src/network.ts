@@ -6,10 +6,9 @@ import {
   LRelu,
   Tanh,
   Sigmoid,
-  Rescale,
-  Scale,
+  Normalize,
 } from "./layer.ts";
-import type { DenseData, SimpleData, ScaleData } from "./layer.ts";
+import type { DenseData, DeviationData } from "./layer.ts";
 import { Node } from "./node.ts";
 
 // type SimpleNeuronData = { bias: number; weight: number };
@@ -17,20 +16,13 @@ import { Node } from "./node.ts";
 type ActivationLayer = "Relu" | "LRelu" | "Sigmoid" | "Tanh";
 type DenseLayer = { Dense: DenseData };
 type SimpleLayer = { Simple: DenseData };
-type RescaleLayer = { Rescale: SimpleData };
-type ScaleLayer = { Scale: ScaleData };
-type NeuronLayer = DenseLayer | SimpleLayer | RescaleLayer | ScaleLayer;
+type NormalizeLayer = { Normalize: DeviationData };
+type NeuronLayer = DenseLayer | SimpleLayer;
 
-type Layer = Dense | Relu | LRelu | Sigmoid | Tanh | Simple | Rescale;
-// type Layer = NeuronLayer | ActivationLayer;
+type Layer = Dense | Relu | LRelu | Sigmoid | Tanh | Simple;
 type Layers = Array<Layer>;
 
-// type LayerData = {
-//   type: string;
-//   data?: Array<unknown>;
-// };
-
-type LayerData = ActivationLayer | NeuronLayer;
+type LayerData = ActivationLayer | NeuronLayer | NormalizeLayer;
 
 export type NetworkData = {
   inputs: number;
@@ -67,19 +59,16 @@ export class Network extends Node {
             break;
         }
       } else {
-        Object.entries(layer).forEach(([type, neurons]) => {
+        Object.entries(layer).forEach(([type, data]) => {
           switch (type) {
             case "Dense":
-              layers.push(Dense.import(neurons));
+              layers.push(Dense.import(data));
               break;
             case "Simple":
-              layers.push(Simple.import(neurons));
+              layers.push(Simple.import(data));
               break;
-            case "Rescale":
-              layers.push(Rescale.import(neurons));
-              break;
-            case "Scale":
-              layers.push(Scale.import(neurons));
+            case "Normalize":
+              layers.push(Normalize.import(data));
               break;
           }
         });
@@ -100,11 +89,8 @@ export class Network extends Node {
         case "Simple":
           layers.push({ Simple: layer.export as DenseData });
           break;
-        case "Rescale":
-          layers.push({ Rescale: layer.export as SimpleData });
-          break;
-        case "Scale":
-          layers.push({ Scale: layer.export as ScaleData });
+        case "Normalize":
+          layers.push({ Normalize: layer.export as DeviationData });
           break;
         case "LRelu":
         case "Relu":
@@ -177,15 +163,7 @@ export class Network extends Node {
     return this.add(new Tanh());
   }
 
-  // public get normalize(): Network {
-  //   return this.add(new Normalize(this.inputs));
-  // }
-
-  public get rescale(): Network {
-    return this.add(new Rescale(this.inputs));
-  }
-
-  public scale(data: ScaleData): Network {
-    return this.add(new Scale(data));
+  public get normalize(): Network {
+    return this.add(new Normalize(this.inputs));
   }
 }

@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf, assertNotEquals } from "@std/assert";
+import { assertEquals, assertGreaterOrEqual, assertInstanceOf, assertNotEquals } from "@std/assert";
 import { Network } from "./network.ts";
 import type { NetworkData } from "./network.ts";
 
@@ -50,4 +50,15 @@ Deno.test("XOR testing", () => {
   const i: Network = Network.import(e);
   const e2: NetworkData = i.export;
   assertEquals(e, e2);
+});
+
+Deno.test("Integration", () => {
+  const n: Network = new Network(2).normalize.dense(2).tanh.lrelu.sigmoid.simple.relu;
+  const e: NetworkData = n.export;
+  const i: Network = Network.import(e);
+  const e2: NetworkData = i.export;
+  assertEquals(e, e2);
+  const predict = i.predict([1, 2]);
+  assertGreaterOrEqual(predict[0], 0);
+  assertGreaterOrEqual(predict[1], 0);
 });

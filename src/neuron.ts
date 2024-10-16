@@ -6,8 +6,9 @@ export type NeuronData = {
   weights: Array<number>;
 };
 
-export type ScalerData = {
-  max: number;
+export type NormalizerData = {
+  mean: number;
+  variance: number;
 };
 
 /** Random Value between -1 and +1 */
@@ -62,74 +63,28 @@ export class Neuron extends Node {
   }
 }
 
-/** Node scaling input to -1:1 output range */
-export class Scaler extends Node {
-  private min = 0;
-  private max = 0;
-  private a = 0;
-  private b = 0;
-
-  /** Adjust scaling for each input
-   * TODO: Freeze range when not in training mode
-   */
-  public forward(v: Value): Value {
-    // Extend range
-    if (v.data > this.max) {
-      this.max = v.data;
-      this.b = 1;
-    }
-    if (v.data < this.min) {
-      this.min = v.data;
-      this.a = -1;
-    }
-
-    // [0:0] range and 0 input value
-    if (this.min == 0 && this.max == 0) return v;
-
-    // Scale input value to a:b
-    // Scaling formula: (b-a) * (v-min) / (max-min) + a
-    return new Value(this.b - this.a)
-      .mul(v.sub(this.min))
-      .div(this.max - this.min)
-      .add(this.a);
-  }
-
-  /** Parameters
-   * TODO: Adjust parameters during back propagation instead of forward propagation
-   */
-  public get parameters(): Value[] {
-    return [];
-  }
-}
-
-/** Neuron node with multiple weighted inputs and bias */
-export class Rescaler extends Node {
-  private readonly cache = { data: 0 };
-  private readonly factor: Value;
-
-  constructor(private readonly max: number = 1) {
+/** Rescale input to mean 0 and standard deviation 1 */
+export class Normalizer extends Node {
+  constructor(
+    private readonly mean: Value = randomValue(),
+    private readonly variance: Value = randomValue()
+  ) {
     super();
-    this.cache.data = max;
-    this.factor = new Value(max);
-  }
-
-  /** Re-initialize a pre-trained neuron */
-  public static import(data: ScalerData): Rescaler {
-    return new Rescaler(data.max);
-  }
-
-  /** Export bias and weights */
-  public get export(): ScalerData {
-    return { max: this.max };
   }
 
   /** Add bias before factoring */
   public forward(input: Value): Value {
     // return input.add(this.bias).mul(this.weight);
-    return input.rescale(this.factor, this.cache);
+    return input.sub(this.mean).div(this.variance);
   }
 
-  public get parameters(): Value[] {
-    return [this.factor];
+  /** Re-initialize a pre-trained neuron */
+  public static import(data: NormalizerData): Normalizer {
+    return new Normalizer(new Value(data.mean), new Value(data.variance));
+  }
+
+  /** Export bias and weights */
+  public get export(): NormalizerData {
+    return { mean: this.mean.data, variance: this.variance.data };
   }
 }

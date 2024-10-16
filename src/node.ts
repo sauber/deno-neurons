@@ -1,6 +1,7 @@
+import type { Inputs } from "./train.ts";
 import type { Value } from "./value.ts";
 
-export class Node {
+export abstract class Node {
   /** Reset gradient to 0 for all parameters */
   public zeroGrad() {
     this.parameters.forEach((p) => p.grad = 0);
@@ -15,4 +16,7 @@ export class Node {
   public get export(): unknown {
     return {};
   }
+
+  /** Preprocessing by adapting to input data */
+  public adapt(_: Inputs): void {}
 }

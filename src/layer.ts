@@ -1,10 +1,15 @@
+import { avg, std } from "@sauber/statistics";
 import { Value } from "./value.ts";
 import { Node } from "./node.ts";
-import { Neuron, Scaler, Rescaler } from "./neuron.ts";
-import type { NeuronData, ScalerData } from "./neuron.ts";
+import { Neuron, Normalizer } from "./neuron.ts";
+import type { NeuronData, NormalizerData } from "./neuron.ts";
+import type { Inputs } from "./train.ts";
 
+/** An exported layer of NeuronData */
 export type DenseData = Array<NeuronData>;
-export type SimpleData = Array<ScalerData>;
+
+/** An exported layer of NormalizerData */
+export type DeviationData = Array<NormalizerData>;
 
 type Offset = {
   offset: number;
@@ -107,12 +112,13 @@ export class Tanh extends Node {
   }
 }
 
+/** Shift and scale inputs into a distribution centered around 0 with standard deviation 1 */
 export class Normalize extends Node {
   constructor(
     public readonly inputs: number,
-    private readonly scalers: Array<Scaler> = Array.from(
+    private readonly scalers: Array<Normalizer> = Array.from(
       Array(inputs),
-      (_) => new Scaler()
+      (_) => new Normalizer()
     )
   ) {
     super();
@@ -121,61 +127,31 @@ export class Normalize extends Node {
   public forward(x: Value[]): Value[] {
     return this.scalers.map((scaler, index) => scaler.forward(x[index]));
   }
-}
 
-export class Rescale extends Node {
-  constructor(
-    public readonly inputs: number,
-    private readonly rescalers: Array<Rescaler> = Array.from(
-      Array(inputs),
-      (_) => new Rescaler()
-    )
-  ) {
-    super();
+  /** Calculate means and variance of input, and set offset and factor accordingly */
+  public adapt(inputs: Inputs): void {
+    inputs[0].forEach((_, index) => {
+      const col: number[] = inputs.map((r) => r[index]);
+      const mean: number = avg(col);
+      const variance: number = std(col);
+      // console.log({ mean, variance });
+      this.scalers[index] = new Normalizer(
+        new Value(mean),
+        new Value(variance)
+      );
+    });
   }
 
-  /** Forward propagation of value */
-  public forward(x: Value[]): Value[] {
-    return this.rescalers.map((rescaler, index) => rescaler.forward(x[index]));
+  /** Export layer of normalizers */
+  public get export(): DeviationData {
+    return this.scalers.map((s) => s.export);
   }
 
-  /** Export array of Rescaler data */
-  public get export(): SimpleData {
-    return this.rescalers.map((r) => r.export);
-  }
-
-  /** Import array of Rescaler data */
-  public static import(data: SimpleData): Rescale {
-    const rescalers: Array<Rescaler> = data.map((data: ScalerData) =>
-      Rescaler.import(data)
+  /** Generate layer of normalizers from expected mean and variance of input columns */
+  public static import(data: DeviationData): Normalize {
+    return new Normalize(
+      data.length,
+      data.map((n) => new Normalizer(new Value(n.mean), new Value(n.variance)))
     );
-    return new Rescale(rescalers.length, rescalers);
-  }
-
-  public get parameters(): Value[] {
-    const params: Value[] = [];
-    for (const rescaler of this.rescalers) params.push(...rescaler.parameters);
-    return params;
-  }
-}
-
-/** Scale input data before entering layers of neurons */
-export class Scale extends Node {
-  constructor(private readonly scales: ScaleData) {
-    super();
-  }
-
-  public forward(x: Value[]): Value[] {
-    return this.scales.map(
-      (scale, index) => new Value(x[index].data * scale.factor + scale.offset)
-    );
-  }
-
-  public get export(): ScaleData {
-    return this.scales;
-  }
-
-  public static import(data: ScaleData): Scale {
-    return new Scale(data);
   }
 }

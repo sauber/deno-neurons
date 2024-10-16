@@ -1,9 +1,23 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
-import { Dense, LRelu, Relu, Rescale, Scale, Sigmoid, Simple, Tanh } from "./layer.ts";
+import {
+  assertAlmostEquals,
+  assertEquals,
+  assertInstanceOf,
+} from "@std/assert";
+import {
+  Dense,
+  LRelu,
+  Normalize,
+  Relu,
+  Sigmoid,
+  Simple,
+  Tanh,
+} from "./layer.ts";
 import { Network } from "./network.ts";
 import type { NetworkData } from "./network.ts";
-import type { DenseData, SimpleData } from "./layer.ts";
-import { ScalerData } from "./neuron.ts";
+import type { DenseData } from "./layer.ts";
+import type { Inputs } from "./train.ts";
+import { v } from "./value.ts";
+import { avg, std } from "@sauber/statistics";
 
 ////////////////////////////////////////////////////////////////////////
 /// Relu Layer
@@ -152,52 +166,37 @@ Deno.test("Dense activation", () => {
 });
 
 ////////////////////////////////////////////////////////////////////////
-/// Rescale Layer
+/// Normalization Processing Layer
 ////////////////////////////////////////////////////////////////////////
 
-Deno.test("Rescale Instance", () => {
-  assertInstanceOf(new Rescale(0), Rescale);
+Deno.test("Normalize Instance", () => {
+  assertInstanceOf(new Normalize(0), Normalize);
 });
 
-Deno.test("Rescale Import/export", () => {
-  const data: NetworkData = {
-    inputs: 1,
-    layers: [{ Rescale: [{ max: 1 }] }],
-  };
+Deno.test("Normalize Adapt", () => {
+  const input: Inputs = [
+    [0.1, 1400],
+    [0.01, 1300],
+    [0.055, 1350],
+  ];
 
-  const network: Network = Network.import(data);
-  const exported: NetworkData = network.export;
-  assertEquals(exported, data);
-});
+  // Adapt, export and import
+  const layer = new Normalize(0);
+  layer.adapt(input);
+  const e = layer.export;
+  const l = Normalize.import(e);
 
-Deno.test("Rescale activation", () => {
-  const n = new Network(1).rescale;
-  const o = n.predict([0]);
-  assertEquals(o.length, 1);
-});
+  // Confirm stddev of input after adaption
+  const output = input.map((i) =>
+    l.forward(i.map((n) => v(n))).map((o) => o.data)
+  );
 
-
-////////////////////////////////////////////////////////////////////////
-/// Scale Layer
-////////////////////////////////////////////////////////////////////////
-
-Deno.test("Scale Instance", () => {
-  assertInstanceOf(new Scale([]), Scale);
-});
-
-Deno.test("Scale Import/export", () => {
-  const data: NetworkData = {
-    inputs: 1,
-    layers: [{ Scale: [{ offset: 1, factor: 1 }] }],
-  };
-
-  const network: Network = Network.import(data);
-  const exported: NetworkData = network.export;
-  assertEquals(exported, data);
-});
-
-Deno.test("Scale activation", () => {
-  const n = new Network(1).scale([{offset: 1, factor: 1}]);
-  const o = n.predict([0]);
-  assertEquals(o.length, 1);
+  // Confirm column by column mean==0, variance==1
+  output[0].forEach((_, index) => {
+    const col = output.map((r) => r[index]);
+    const mean = avg(col);
+    const variance = std(col);
+    assertAlmostEquals(mean, 0);
+    assertAlmostEquals(variance, 1);
+  });
 });
