@@ -112,4 +112,9 @@ export class Train {
     if (i % this.callbackFrequency != 0) this.callback(i, this.lossHistory);
     return i;
   }
+
+  /** Most recent training loss */
+  public get loss(): number {
+    return this.lossHistory[this.lossHistory.length - 1];
+  }
 }
