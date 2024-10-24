@@ -159,26 +159,29 @@ export class Value {
   }
 
   /** Autoscale value to -1:1 */
-  public rescale(factor: Value, cache: {data: number}): Value {
+  public rescale(factor: Value, cache: { data: number }): Value {
     // Record larges observed value
     cache.data = Math.max(Math.abs(this.data), cache.data);
-    console.log('rescale forward: ', {cache}, factor.data);
+    console.log("rescale forward: ", { cache }, factor.data);
 
     // Scaled from current max
     const out = new Value(this.data / factor.data, { prev: [this], op: "⚖️" });
     out.backwardStep = () => {
-      console.log('rescale backwards: ', {cache}, factor.data, out.grad);
-      factor.data += (cache.data-factor.data)/10;
+      console.log("rescale backwards: ", { cache }, factor.data, out.grad);
+      factor.data += (cache.data - factor.data) / 10;
 
       // this.grad += other.data * out.grad;
       // other.grad += this.data * out.grad;
 
-      this.grad += 1/factor.data * out.grad;
+      this.grad += 1 / factor.data * out.grad;
       // this.grad += 1;
-      factor.grad += 1/this.data * out.grad;
-      console.log('grads: ', {this: this.grad, factor: factor.grad, out: out.grad});
-
-    }
+      factor.grad += 1 / this.data * out.grad;
+      console.log("grads: ", {
+        this: this.grad,
+        factor: factor.grad,
+        out: out.grad,
+      });
+    };
     return out;
   }
 

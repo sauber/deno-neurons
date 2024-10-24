@@ -1,16 +1,16 @@
 import { Value } from "./value.ts";
 import {
   Dense,
-  Simple,
-  Relu,
   LRelu,
-  Tanh,
-  Sigmoid,
   Normalize,
+  Relu,
+  Sigmoid,
+  Simple,
+  Tanh,
 } from "./layer.ts";
 import type { DenseData, DeviationData } from "./layer.ts";
 import { Node } from "./node.ts";
-import { Inputs } from "./train.ts";
+import type { Inputs } from "./train.ts";
 
 type ActivationLayer = "Relu" | "LRelu" | "Sigmoid" | "Tanh";
 type DenseLayer = { Dense: DenseData };
@@ -33,7 +33,7 @@ export type NetworkData = {
 export class Network extends Node {
   constructor(
     private readonly inputs: number,
-    private readonly layers: Layers = []
+    private readonly layers: Layers = [],
   ) {
     super();
   }

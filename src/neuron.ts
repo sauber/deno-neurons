@@ -23,9 +23,10 @@ export class Neuron extends Node {
   constructor(
     public readonly inputs: number,
     private readonly bias: Value = randomValue(),
-    private readonly weights: Array<Value> = Array.from(Array(inputs), (_) =>
-      randomValue()
-    )
+    private readonly weights: Array<Value> = Array.from(
+      Array(inputs),
+      (_) => randomValue(),
+    ),
   ) {
     super();
   }
@@ -38,7 +39,7 @@ export class Neuron extends Node {
   }
 
   /** Export bias and weights */
-  public override  get export(): NeuronData {
+  public override get export(): NeuronData {
     return {
       bias: this.bias.data,
       weights: this.weights.map((v: Value) => v.data),
@@ -49,14 +50,14 @@ export class Neuron extends Node {
   public forward(inputs: Value[]): Value {
     if (inputs.length != this.weights.length) {
       throw new Error(
-        `Wrong number of input. Got ${inputs.length}, Expected ${this.weights.length}.`
+        `Wrong number of input. Got ${inputs.length}, Expected ${this.weights.length}.`,
       );
     }
     return sum(
       ...inputs.map((input: Value, index: number) =>
         input.mul(this.weights[index])
       ),
-      this.bias
+      this.bias,
     );
   }
 
@@ -69,7 +70,7 @@ export class Neuron extends Node {
 export class Normalizer extends Node {
   constructor(
     private readonly mean: Value = randomValue(),
-    private readonly variance: Value = randomValue()
+    private readonly variance: Value = randomValue(),
   ) {
     super();
   }

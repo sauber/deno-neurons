@@ -43,7 +43,7 @@ export class Train {
   constructor(
     public readonly network: Network,
     public readonly inputs: Inputs,
-    public readonly outputs: Outputs
+    public readonly outputs: Outputs,
   ) {
     this.xs = inputs.map((row) => row.map((v) => new Value(v)));
     this.ys = outputs.map((row) => row.map((v) => new Value(v)));
@@ -99,8 +99,9 @@ export class Train {
     let i = 1;
     for (; i <= iterations; i++) {
       this.step(rate);
-      if (i % this.callbackFrequency == 0 && i > 0)
+      if (i % this.callbackFrequency == 0 && i > 0) {
         this.callback(i, this.lossHistory);
+      }
       const l = this.lossHistory.length;
       // Stop when loss is small enough
       if (this.lossHistory[this.lossHistory.length - 1] < this.epsilon) break;

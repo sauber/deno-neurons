@@ -22,8 +22,8 @@ export class Simple extends Node {
     public readonly inputs: number,
     private readonly neurons: Array<Neuron> = Array.from(
       Array(inputs),
-      (_) => new Neuron(1)
-    )
+      (_) => new Neuron(1),
+    ),
   ) {
     super();
   }
@@ -55,8 +55,8 @@ export class Dense extends Node {
     public readonly outputs: number,
     private readonly neurons: Array<Neuron> = Array.from(
       Array(outputs),
-      (_) => new Neuron(inputs)
-    )
+      (_) => new Neuron(inputs),
+    ),
   ) {
     super();
   }
@@ -117,8 +117,8 @@ export class Normalize extends Node {
     public readonly inputs: number,
     private readonly scalers: Array<Normalizer> = Array.from(
       Array(inputs),
-      (_) => new Normalizer()
-    )
+      (_) => new Normalizer(),
+    ),
   ) {
     super();
   }
@@ -128,7 +128,7 @@ export class Normalize extends Node {
   }
 
   /** Calculate means and variance of input, and set offset and factor accordingly */
-  public override  adapt(inputs: Inputs): void {
+  public override adapt(inputs: Inputs): void {
     inputs[0].forEach((_, index) => {
       const col: number[] = inputs.map((r) => r[index]);
       const mean: number = avg(col);
@@ -136,7 +136,7 @@ export class Normalize extends Node {
       // console.log({ mean, variance });
       this.scalers[index] = new Normalizer(
         new Value(mean),
-        new Value(variance)
+        new Value(variance),
       );
     });
   }
@@ -150,7 +150,7 @@ export class Normalize extends Node {
   public static import(data: DeviationData): Normalize {
     return new Normalize(
       data.length,
-      data.map((n) => new Normalizer(new Value(n.mean), new Value(n.variance)))
+      data.map((n) => new Normalizer(new Value(n.mean), new Value(n.variance))),
     );
   }
 }

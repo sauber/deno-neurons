@@ -1,4 +1,9 @@
-import { assertEquals, assertGreaterOrEqual, assertInstanceOf, assertNotEquals } from "@std/assert";
+import {
+  assertEquals,
+  assertGreaterOrEqual,
+  assertInstanceOf,
+  assertNotEquals,
+} from "@std/assert";
 import { Network } from "./network.ts";
 import type { NetworkData } from "./network.ts";
 
@@ -24,7 +29,7 @@ Deno.test("Simple Layer", () => {
   const n = new Network(2);
   const s: Network = n.simple;
   // console.log(s.export);
-  const output: number[] = s.predict([0,0]);
+  const output: number[] = s.predict([0, 0]);
   assertEquals(output.length, 2);
 });
 
@@ -53,7 +58,8 @@ Deno.test("XOR testing", () => {
 });
 
 Deno.test("Integration", () => {
-  const n: Network = new Network(2).normalize.dense(2).tanh.lrelu.sigmoid.simple.relu;
+  const n: Network =
+    new Network(2).normalize.dense(2).tanh.lrelu.sigmoid.simple.relu;
   const e: NetworkData = n.export;
   const i: Network = Network.import(e);
   const e2: NetworkData = i.export;
