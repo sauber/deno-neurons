@@ -63,7 +63,7 @@ export class Train {
   }
 
   /** Run training on a batch */
-  private step(learning_rate: number): void {
+  private step(iteration: number, learning_rate: number): void {
     const [xs, ys] = this.batch();
 
     // Forward
@@ -71,11 +71,11 @@ export class Train {
       this.network.forward(line)
     );
     const loss = MeanSquareError(ys, predict);
-    if (isNaN(loss.data) || loss.data > 1000000) {
-      // loss.print();
-      throw new Error(`Loss inclined to infinity: ${loss.data}`);
-    }
     this.lossHistory.push(loss.data);
+    if (isNaN(loss.data) || loss.data > 1000000) {
+      console.warn(this.lossHistory.slice(-5));
+      throw new Error(`Loss inclined towards infinity (${loss.data}) at iteration ${iteration}`);
+    }
 
     // Backward
     this.network.zeroGrad();
@@ -98,7 +98,7 @@ export class Train {
   public run(iterations: number = 1000, rate: number = 0.1): number {
     let i = 1;
     for (; i <= iterations; i++) {
-      this.step(rate);
+      this.step(i, rate);
       if (i % this.callbackFrequency == 0 && i > 0) {
         this.callback(i, this.lossHistory);
       }
