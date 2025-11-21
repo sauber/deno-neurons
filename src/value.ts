@@ -170,11 +170,7 @@ export class Value {
       console.log("rescale backwards: ", { cache }, factor.data, out.grad);
       factor.data += (cache.data - factor.data) / 10;
 
-      // this.grad += other.data * out.grad;
-      // other.grad += this.data * out.grad;
-
       this.grad += 1 / factor.data * out.grad;
-      // this.grad += 1;
       factor.grad += 1 / this.data * out.grad;
       console.log("grads: ", {
         this: this.grad,
