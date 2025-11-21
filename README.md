@@ -33,7 +33,8 @@ train.run(max_iteration, learning_rate);
 
 ## See Also
 
-Use [ML-CLI-Dashboard](https://github.com/sauber/deno-dashboard) for ascii dashboard visualization during training.
+Use [ML-CLI-Dashboard](https://github.com/sauber/deno-dashboard) for ascii
+dashboard visualization during training.
 
 ## Credits
 
