@@ -50,15 +50,20 @@ export class Train {
   }
 
   /** Pick random samples for training */
-  private batch(): [Values, Values] {
+  protected batch(): [Values, Values] {
     const xs: Values = [];
     const ys: Values = [];
-    const l = this.xs.length;
-    for (let n = 0; n < this.batchSize; ++n) {
-      const i = Math.floor(Math.random() * l);
+
+    // Random row indices
+    const shuffled_index: number[] = Array.from(Array(this.xs.length).keys())
+      .sort(
+        () => Math.random() - 0.5,
+      ).slice(0, this.batchSize);
+    for (const i of shuffled_index) {
       xs.push(this.xs[i]);
       ys.push(this.ys[i]);
     }
+
     return [xs, ys];
   }
 
@@ -74,7 +79,9 @@ export class Train {
     this.lossHistory.push(loss.data);
     if (isNaN(loss.data) || loss.data > 1000000) {
       console.warn(this.lossHistory.slice(-5));
-      throw new Error(`Loss inclined towards infinity (${loss.data}) at iteration ${iteration}`);
+      throw new Error(
+        `Loss inclined towards infinity (${loss.data}) at iteration ${iteration}`,
+      );
     }
 
     // Backward
