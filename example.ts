@@ -15,6 +15,7 @@ const network = new Network(2).dense(8).lrelu.dense(6).lrelu.dense(1).tanh;
 // Perform training of neural network
 const train = new Train(network, inputs, outputs);
 train.epsilon = 0.01;
+train.regularization = 0.98;
 train.callback = (iteration: number, loss: number[]) =>
   console.log(`Iteration: ${iteration}, Loss: ${loss[loss.length - 1]}`);
 const max_iteration = 20000;

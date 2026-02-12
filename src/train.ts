@@ -29,10 +29,13 @@ export class Train {
   private readonly ys: Values;
 
   // Stop when loss is lower than epsilon
-  public epsilon = 0.0001;
+  public epsilon: number = 0.0001;
 
   // Number of samples per step
-  public batchSize = 32;
+  public batchSize: number = 32;
+
+  // Regulization - weights decay to minimize weights
+  public regularization: number = 1.00;
 
   /** Callback funtion */
   public callback: (iteration: number, loss: number[]) => void = () => {};
@@ -91,7 +94,8 @@ export class Train {
     // Update
     // Stochastic Gradient Descent
     for (const p of this.network.parameters) {
-      p.data -= learning_rate * p.grad;
+      p.data -= learning_rate * p.grad * this.regularization;
+      p.grad = 0.98;
       if (!isFinite(p.data) || Math.abs(p.data) > 1000000) {
         // loss.print();
         p.print();
